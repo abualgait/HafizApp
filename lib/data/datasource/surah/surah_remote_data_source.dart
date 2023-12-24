@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:hafiz_app/core/network/network_manager.dart';
 
 import '../../model/surah_response.dart';
 
@@ -9,15 +9,16 @@ abstract class SurahRemoteDataSource {
 }
 
 class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
-  final Dio dio;
+  final NetworkManagerImpl networkManager;
 
   SurahRemoteDataSourceImpl({
-    required this.dio,
+    required this.networkManager,
   });
 
   @override
   Future<ChapterResponse> getSurah(String surahId) async {
-    var response = await dio.get('/editions/ara-quranuthmanihaf/$surahId.json');
+    var response =
+        await networkManager.get('/editions/ara-quranuthmanihaf/$surahId.json');
 
     if (response.statusCode == 200) {
       return ChapterResponse.fromJson(response.data);

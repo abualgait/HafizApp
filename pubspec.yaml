@@ -41,7 +41,6 @@ dependencies:
   cached_network_image: ^3.2.1
   flutter_svg: ^2.0.9
   equatable: ^2.0.0
-  smooth_page_indicator: ^1.0.0+2
   dio: ^5.0.3
   dartz: ^0.10.1
   get_it: ^7.6.4
