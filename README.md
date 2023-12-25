@@ -23,6 +23,8 @@ Dive into the world of Flutter with our Hafiz app – a meticulously crafted lea
 
 8. **GetIt Dependency Injection:** Experience the simplicity and power of dependency injection with GetIt. Our app utilizes GetIt for efficient management of dependencies, ensuring modularity and testability.
 
+9. **Unit testing:** with mocktail, flutter_test and bloc_test.
+
 🌐 **Sharing the Flutter Love:**
 This Quran app is not just an app – it's a learning journey! 🚀 I have crafted it to serve as a starter template for Flutter enthusiasts, enabling them to explore and understand the core concepts of Flutter development.
 
