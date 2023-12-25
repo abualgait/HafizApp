@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:dio/dio.dart';
 import 'package:hafiz_app/core/network/network_manager.dart';
 
 import '../../model/surah_response.dart';
@@ -23,7 +22,7 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
     if (response.statusCode == 200) {
       return ChapterResponse.fromJson(response.data);
     } else {
-      throw HttpException;
+      throw DioException;
     }
   }
 }

@@ -7,7 +7,10 @@ part 'theme_event.dart';
 part 'theme_state.dart';
 
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
-  ThemeBloc() : super(PrefUtils().getIsDarkMode() ? DarkThemeState() : LightThemeState()) {
+  ThemeBloc()
+      : super(PrefUtils().getIsDarkMode()
+            ? DarkThemeState()
+            : LightThemeState()) {
     on<ThemeEvent>(_changeTheme);
   }
 
@@ -17,6 +20,14 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   ) async {
     if (event is ToggleThemeEvent) {
       emit(PrefUtils().getIsDarkMode() ? LightThemeState() : DarkThemeState());
+    }
+
+    if (event is OfflineEvent) {
+      emit(OfflineState());
+    }
+
+    if (event is OnlineEvent) {
+      emit(OnlineState());
     }
   }
 }

@@ -32,7 +32,6 @@ class _SurahScreenState extends State<SurahScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
         backgroundColor: Color(
             PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0x0800FFD0),

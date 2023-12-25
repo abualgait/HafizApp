@@ -44,7 +44,9 @@ dependencies:
   dio: ^5.0.3
   dartz: ^0.10.1
   get_it: ^7.6.4
-
+  #testing
+  mocktail: ^1.0.2
+  bloc_test: ^9.1.5
 
 dev_dependencies:
   flutter_test:

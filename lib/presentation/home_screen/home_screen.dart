@@ -155,8 +155,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     fontSize: 12),
                               ),
                               Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                                padding: const EdgeInsets.only(
+                                    top: 8.0, bottom: 8.0),
                                 child: Text(
                                   lastReadSurah?.nameArabic ?? "",
                                   style: const TextStyle(

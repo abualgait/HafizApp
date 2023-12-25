@@ -1,4 +1,4 @@
-package com.learn.flutter.hafiz_app
+package com.hafiz.app.hafiz_app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hafiz_app/core/app_export.dart';
 import 'package:hafiz_app/data/datasource/surah/surah_remote_data_source.dart';
@@ -24,10 +25,21 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetSurah(surahRepository: sl()));
 
   // Repository
-  sl.registerLazySingleton<SurahRepository>(() => SurahRepositoryImpl(
-      surahRemoteDataSource: sl(), networkInfo: NetworkInfo()));
+  sl.registerLazySingleton<SurahRepository>(() =>
+      SurahRepositoryImpl(surahRemoteDataSource: sl(), networkInfo: sl()));
 
   // Data Source
-  sl.registerLazySingleton<SurahRemoteDataSource>(
-      () => SurahRemoteDataSourceImpl(networkManager: NetworkManagerImpl()));
+  sl.registerLazySingleton<SurahRemoteDataSource>(() =>
+      SurahRemoteDataSourceImpl(networkManager: NetworkManagerImpl(sl())));
+
+  sl.registerLazySingleton(() => NetworkInfo(Connectivity()));
+
+  /**
+   * ! External
+   */
+  sl.registerLazySingleton(() {
+    final dio = Dio();
+    dio.options.baseUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1";
+    return dio;
+  });
 }

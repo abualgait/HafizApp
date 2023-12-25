@@ -18,20 +18,6 @@ class ServerFailure extends Failure {
   }
 }
 
-class CacheFailure extends Failure {
-  final String errorMessage;
-
-  CacheFailure(this.errorMessage);
-
-  @override
-  List<Object> get props => [errorMessage];
-
-  @override
-  String toString() {
-    return 'CacheFailure{errorMessage: $errorMessage}';
-  }
-}
-
 class ConnectionFailure extends Failure {
   final String errorMessage = messageConnectionFailure;
 

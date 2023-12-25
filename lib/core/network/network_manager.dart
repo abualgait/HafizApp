@@ -11,12 +11,9 @@ abstract class NetworkManagerI {
 }
 
 class NetworkManagerImpl extends NetworkManagerI {
-  final Dio _dio = Dio();
+  final Dio _dio;
 
-  NetworkManagerImpl() {
-    _dio.options.baseUrl =
-        "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1";
-  }
+  NetworkManagerImpl(this._dio);
 
   @override
   Future<Response> get(String url, {Map<String, dynamic>? params}) async {
