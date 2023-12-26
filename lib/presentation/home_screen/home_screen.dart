@@ -32,6 +32,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     mediaQueryData = MediaQuery.of(context);
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Color(
+            PrefUtils().getIsDarkMode() == true ?
+            0xFF000000 :
+            0xFFFFFFFF),
         appBar: CustomAppBar(
             actions: [
               Row(
@@ -142,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     children: [
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
+                          padding: const EdgeInsets.only(left: 8.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,

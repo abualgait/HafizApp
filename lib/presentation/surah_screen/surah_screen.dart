@@ -32,38 +32,40 @@ class _SurahScreenState extends State<SurahScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Color(
-            PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0x0800FFD0),
-        body: BlocProvider<SurahBloc>(
-            create: (context) => surahBloc,
-            child:
-                BlocBuilder<SurahBloc, SurahState>(builder: (context, state) {
-              if (state is LoadingSurahState) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is FailureSurahState) {
-                return Center(child: Text(state.errorMessage));
-              } else {
-                return SizedBox(
-                    width: double.maxFinite,
-                    child: SingleChildScrollView(
-                        child: Column(children: [
-                      _buildAppBar(surah),
-                      SizedBox(height: 20.v),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: (state as SuccessSurahState).chapters.length,
-                        itemBuilder: (context, index) {
-                          final aya = (state).chapters[index];
-                          return AyaListItem(
-                            aya: aya,
-                          );
-                        },
-                      ),
-                    ])));
-              }
-            })));
+    return SafeArea(
+      child: Scaffold(
+          backgroundColor: Color(
+              PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
+          body: BlocProvider<SurahBloc>(
+              create: (context) => surahBloc,
+              child:
+                  BlocBuilder<SurahBloc, SurahState>(builder: (context, state) {
+                if (state is LoadingSurahState) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is FailureSurahState) {
+                  return Center(child: Text(state.errorMessage));
+                } else {
+                  return SizedBox(
+                      width: double.maxFinite,
+                      child: SingleChildScrollView(
+                          child: Column(children: [
+                        _buildAppBar(surah),
+                        SizedBox(height: 20.v),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: (state as SuccessSurahState).chapters.length,
+                          itemBuilder: (context, index) {
+                            final aya = (state).chapters[index];
+                            return AyaListItem(
+                              aya: aya,
+                            );
+                          },
+                        ),
+                      ])));
+                }
+              }))),
+    );
   }
 }
 
@@ -104,11 +106,12 @@ Widget _buildAppBar(Surah? surah) {
             width: 150.h),
       ),
       Container(
-          height: 165.v,
+          height: 180.v,
           width: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF006754), Color(0xDB87D1A4)],
+              colors: [Color(0xFF006754),
+                Color(0xDB87D1A4)],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
             ),

@@ -123,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   child: CustomElevatedButton(
                                       key: const ValueKey("get_started_key"),
                                       onPressed: () {
-                                        NavigatorService.pushNamed(
+                                        NavigatorService.popAndPushNamed(
                                           AppRoutes.homePage,
                                         );
                                       },
