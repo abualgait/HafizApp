@@ -5,8 +5,8 @@ import 'package:hafiz_app/data/datasource/surah/surah_remote_data_source.dart';
 import 'package:hafiz_app/data/repository/surah/surah_repository_impl.dart';
 import 'package:hafiz_app/domain/repository/surah/surah_repository.dart';
 import 'package:hafiz_app/domain/usecase/getsurah/get_surah.dart';
-import 'package:hafiz_app/presentation/home_screen/bloc/home_bloc.dart';
-import 'package:hafiz_app/presentation/surah_screen/bloc/surah_bloc.dart';
+import 'package:hafiz_app/presentation/home_screen/provider/home_provider.dart';
+import 'package:hafiz_app/presentation/surah_screen/provider/surah_provider.dart';
 
 import 'core/network/network_manager.dart';
 
@@ -17,8 +17,8 @@ Future<void> init() async {
    * ! Features
    */
   // Bloc
-  sl.registerFactory(() => SurahBloc(getSurah: sl()));
-  sl.registerFactory(() => HomeBloc());
+  sl.registerLazySingleton(() => SurahProvider(getSurah: sl()));
+  sl.registerLazySingleton(() => HomeProvider());
   sl.registerLazySingleton(() => ThemeBloc());
 
   // Use Case

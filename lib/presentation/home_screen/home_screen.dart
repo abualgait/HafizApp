@@ -1,11 +1,12 @@
 import "package:flutter/material.dart";
 import "package:hafiz_app/core/quran_index/quran_surah.dart";
+import "package:hafiz_app/presentation/home_screen/provider/home_provider.dart";
+import "package:provider/provider.dart";
 
 import "../../core/app_export.dart";
 import "../../injection_container.dart";
 import "../../widgets/custom_app_bar.dart";
 import "../../widgets/custom_elevated_button.dart";
-import "bloc/home_bloc.dart";
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,7 +24,6 @@ Locale getCurrentLocale() {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  final homeBloc = sl<HomeBloc>();
   final themeBloc = sl<ThemeBloc>();
   bool isDarkMode = PrefUtils().getIsDarkMode();
 
@@ -33,9 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(
-            PrefUtils().getIsDarkMode() == true ?
-            0xFF000000 :
-            0xFFFFFFFF),
+            PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
         appBar: CustomAppBar(
             actions: [
               Row(
@@ -74,47 +72,43 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
             )),
-        body: BlocProvider<HomeBloc>(
-            create: (context) => homeBloc,
-            child: BlocBuilder<HomeBloc, HomeState>(
-              builder: (context, state) {
-                return SizedBox(
+        body: SizedBox(
+          width: double.maxFinite,
+          child: Scaffold(
+            body: Consumer<HomeProvider>(builder:
+                (BuildContext context, HomeProvider value, Widget? child) {
+              return SizedBox(
                   width: double.maxFinite,
-                  child: Scaffold(
-                    body: SizedBox(
-                        width: double.maxFinite,
-                        child: SingleChildScrollView(
-                            child: Column(children: [
-                          (state as UpdateLastReadSurah).surah != null
-                              ? _buildCardLastRead((state).surah)
-                              : const SizedBox.shrink(),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: QuranIndex.quranSurahs.length,
-                            itemBuilder: (context, index) {
-                              final surah = QuranIndex.quranSurahs[index];
-                              return InkWell(
-                                onTap: () {
-                                  PrefUtils().saveLastReadSurah(surah);
-                                  homeBloc.add(HomeShowLastSurahEvent());
-                                  NavigatorService.pushNamed(
-                                      AppRoutes.surahPage,
-                                      arguments: surah);
-                                },
-                                child: SurahListItem(
-                                  surahId: surah.id,
-                                  nameEnglish: surah.nameEnglish,
-                                  nameArabic: surah.nameArabic,
-                                ),
-                              );
-                            },
+                  child: SingleChildScrollView(
+                      child: Column(children: [
+                        value.surah != null
+                        ? _buildCardLastRead(value.surah)
+                        : const SizedBox.shrink(),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: QuranIndex.quranSurahs.length,
+                      itemBuilder: (context, index) {
+                        final surah = QuranIndex.quranSurahs[index];
+                        return InkWell(
+                          onTap: () {
+                            PrefUtils().saveLastReadSurah(surah);
+                            value.showLastSurah();
+                            NavigatorService.pushNamed(AppRoutes.surahPage,
+                                arguments: surah);
+                          },
+                          child: SurahListItem(
+                            surahId: surah.id,
+                            nameEnglish: surah.nameEnglish,
+                            nameArabic: surah.nameArabic,
                           ),
-                        ]))),
-                  ),
-                );
-              },
-            )),
+                        );
+                      },
+                    ),
+                  ])));
+            }),
+          ),
+        ),
       ),
     );
   }

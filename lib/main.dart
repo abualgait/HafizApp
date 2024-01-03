@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hafiz_app/injection_container.dart' as di;
+import 'package:hafiz_app/presentation/home_screen/provider/home_provider.dart';
+import 'package:hafiz_app/presentation/surah_screen/provider/surah_provider.dart';
+import 'package:provider/provider.dart';
 
 import 'core/app_export.dart';
 import 'injection_container.dart';
@@ -59,32 +62,40 @@ class MyApp extends StatelessWidget {
   }
 
   final themeBloc = sl<ThemeBloc>();
+  final surahProvider = sl<SurahProvider>();
+  final homeProvider = sl<HomeProvider>();
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => themeBloc,
-      child: BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) {
-          return MaterialApp(
-            theme: _getTheme(context),
-            title: 'Hafiz',
-            navigatorKey: NavigatorService.navigatorKey,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              AppLocalizationDelegate(),
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale("en", "US"),
-              Locale("ar", "EG"),
-            ],
-            initialRoute: AppRoutes.onboardingScreen,
-            routes: AppRoutes.routes,
-          );
-        },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => homeProvider),
+        ChangeNotifierProvider(create: (context) => surahProvider)
+      ],
+      child: BlocProvider(
+        create: (context) => themeBloc,
+        child: BlocBuilder<ThemeBloc, ThemeState>(
+          builder: (context, state) {
+            return MaterialApp(
+              theme: _getTheme(context),
+              title: 'Hafiz',
+              navigatorKey: NavigatorService.navigatorKey,
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: const [
+                AppLocalizationDelegate(),
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale("en", "US"),
+                Locale("ar", "EG"),
+              ],
+              initialRoute: AppRoutes.onboardingScreen,
+              routes: AppRoutes.routes,
+            );
+          },
+        ),
       ),
     );
   }

@@ -10,7 +10,7 @@ class AppRoutes {
   static const String surahPage = '/surah_screen';
 
   static Map<String, WidgetBuilder> get routes => {
-        onboardingScreen: OnboardingScreen.builder,
+        onboardingScreen:  (context) => const OnboardingScreen(),
         homePage: (context) => const HomeScreen(),
         surahPage: (context) => const SurahScreen(),
       };

@@ -47,7 +47,7 @@ dependencies:
   #testing
   mocktail: ^1.0.2
   bloc_test: ^9.1.5
-
+  provider: ^6.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

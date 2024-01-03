@@ -1,10 +1,11 @@
 import "package:flutter/material.dart";
+import "package:hafiz_app/presentation/surah_screen/provider/surah_provider.dart";
+import "package:provider/provider.dart";
 
 import "../../core/app_export.dart";
 import "../../core/quran_index/quran_surah.dart";
 import "../../data/model/surah_response.dart";
 import "../../injection_container.dart";
-import "bloc/surah_bloc.dart";
 
 class SurahScreen extends StatefulWidget {
   const SurahScreen({super.key});
@@ -14,7 +15,7 @@ class SurahScreen extends StatefulWidget {
 }
 
 class _SurahScreenState extends State<SurahScreen> {
-  final surahBloc = sl<SurahBloc>();
+  final surahProvider = sl<SurahProvider>();
   Surah? surah;
 
   @override
@@ -22,9 +23,8 @@ class _SurahScreenState extends State<SurahScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Retrieve the data from the arguments
       surah = ModalRoute.of(context)!.settings.arguments as Surah?;
-
       if (surah != null) {
-        surahBloc.add(LoadSurahEvent(surahId: surah?.id.toString() ?? ""));
+        surahProvider.loadSurah(surah?.id.toString() ?? "");
       }
     });
     super.initState();
@@ -36,41 +36,41 @@ class _SurahScreenState extends State<SurahScreen> {
       child: Scaffold(
           backgroundColor: Color(
               PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
-          body: BlocProvider<SurahBloc>(
-              create: (context) => surahBloc,
-              child:
-                  BlocBuilder<SurahBloc, SurahState>(builder: (context, state) {
-                if (state is LoadingSurahState) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is FailureSurahState) {
-                  return Center(child: Text(state.errorMessage));
-                } else {
-                  return SizedBox(
-                      width: double.maxFinite,
-                      child: SingleChildScrollView(
-                          child: Column(children: [
-                        _buildAppBar(surah),
-                        SizedBox(height: 20.v),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: (state as SuccessSurahState).chapters.length,
-                          itemBuilder: (context, index) {
-                            final aya = (state).chapters[index];
-                            return AyaListItem(
-                              aya: aya,
-                            );
-                          },
-                        ),
-                      ])));
-                }
-              }))),
+          body: Consumer<SurahProvider>(
+            builder:
+                (BuildContext context, SurahProvider value, Widget? child) {
+              if (value.surahStates?.isLoading == true) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (value.surahStates?.error != "") {
+                return Center(child: Text(value.surahStates?.error ?? ""));
+              } else {
+                return SizedBox(
+                    width: double.maxFinite,
+                    child: SingleChildScrollView(
+                        child: Column(children: [
+                      _buildAppBar(surah),
+                      SizedBox(height: 20.v),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: value.surahStates?.chapters.length,
+                        itemBuilder: (context, index) {
+                          final aya = value.surahStates?.chapters[index];
+                          return AyaListItem(
+                            aya: aya,
+                          );
+                        },
+                      ),
+                    ])));
+              }
+            },
+          )),
     );
   }
 }
 
 class AyaListItem extends StatelessWidget {
-  final Chapter aya;
+  final Chapter? aya;
 
   const AyaListItem({super.key, required this.aya});
 
@@ -80,7 +80,7 @@ class AyaListItem extends StatelessWidget {
       padding: const EdgeInsets.only(
           left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
       child: Text(
-        aya.text,
+        aya?.text ?? "",
         textDirection: TextDirection.rtl,
         style: TextStyle(
             fontSize: 20,
@@ -110,8 +110,7 @@ Widget _buildAppBar(Surah? surah) {
           width: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF006754),
-                Color(0xDB87D1A4)],
+              colors: [Color(0xFF006754), Color(0xDB87D1A4)],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
             ),
