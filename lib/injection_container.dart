@@ -17,7 +17,7 @@ Future<void> init() async {
    * ! Features
    */
   // Bloc
-  sl.registerLazySingleton(() => SurahProvider(getSurah: sl()));
+  sl.registerLazySingleton(() => SurahStateNotifier(getSurah: sl()));
   sl.registerLazySingleton(() => HomeProvider());
   sl.registerLazySingleton(() => ThemeBloc());
 

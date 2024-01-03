@@ -44,10 +44,14 @@ dependencies:
   dio: ^5.0.3
   dartz: ^0.10.1
   get_it: ^7.6.4
+  provider: ^6.1.1
+  flutter_riverpod: ^2.4.9
+
   #testing
   mocktail: ^1.0.2
   bloc_test: ^9.1.5
-  provider: ^6.1.1
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

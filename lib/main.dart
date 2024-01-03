@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:hafiz_app/injection_container.dart' as di;
 import 'package:hafiz_app/presentation/home_screen/provider/home_provider.dart';
 import 'package:hafiz_app/presentation/surah_screen/provider/surah_provider.dart';
@@ -50,7 +51,7 @@ void main() {
     PrefUtils().init(),
     di.init()
   ]).then((value) {
-    runApp(MyApp());
+    runApp(riverpod.ProviderScope(child: MyApp()));
   });
 }
 
@@ -62,16 +63,13 @@ class MyApp extends StatelessWidget {
   }
 
   final themeBloc = sl<ThemeBloc>();
-  final surahProvider = sl<SurahProvider>();
+  final surahProvider = sl<SurahStateNotifier>();
   final homeProvider = sl<HomeProvider>();
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => homeProvider),
-        ChangeNotifierProvider(create: (context) => surahProvider)
-      ],
+      providers: [ChangeNotifierProvider(create: (context) => homeProvider)],
       child: BlocProvider(
         create: (context) => themeBloc,
         child: BlocBuilder<ThemeBloc, ThemeState>(

@@ -1,22 +1,22 @@
 import "package:flutter/material.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:hafiz_app/presentation/surah_screen/provider/surah_provider.dart";
-import "package:provider/provider.dart";
 
 import "../../core/app_export.dart";
 import "../../core/quran_index/quran_surah.dart";
 import "../../data/model/surah_response.dart";
 import "../../injection_container.dart";
 
-class SurahScreen extends StatefulWidget {
+class SurahScreen extends ConsumerStatefulWidget {
   const SurahScreen({super.key});
 
   @override
-  State<SurahScreen> createState() => _SurahScreenState();
+  ConsumerState<SurahScreen> createState() => _SurahScreenState();
 }
 
-class _SurahScreenState extends State<SurahScreen> {
-  final surahProvider = sl<SurahProvider>();
+class _SurahScreenState extends ConsumerState<SurahScreen> {
   Surah? surah;
+  final surahProvider = sl<SurahStateNotifier>();
 
   @override
   void initState() {
@@ -24,7 +24,7 @@ class _SurahScreenState extends State<SurahScreen> {
       // Retrieve the data from the arguments
       surah = ModalRoute.of(context)!.settings.arguments as Surah?;
       if (surah != null) {
-        surahProvider.loadSurah(surah?.id.toString() ?? "");
+        ref.read(surahStateProvider.notifier).loadSurah(surah?.id.toString() ?? "");
       }
     });
     super.initState();
@@ -36,13 +36,13 @@ class _SurahScreenState extends State<SurahScreen> {
       child: Scaffold(
           backgroundColor: Color(
               PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
-          body: Consumer<SurahProvider>(
-            builder:
-                (BuildContext context, SurahProvider value, Widget? child) {
-              if (value.surahStates?.isLoading == true) {
+          body: Consumer(
+            builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              var value = ref.watch(surahStateProvider);
+              if (value.isLoading == true && value.chapters.isEmpty) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (value.surahStates?.error != "") {
-                return Center(child: Text(value.surahStates?.error ?? ""));
+              } else if (value.error != "") {
+                return Center(child: Text(value.error ?? ""));
               } else {
                 return SizedBox(
                     width: double.maxFinite,
@@ -53,9 +53,9 @@ class _SurahScreenState extends State<SurahScreen> {
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: value.surahStates?.chapters.length,
+                        itemCount: value.chapters.length,
                         itemBuilder: (context, index) {
-                          final aya = value.surahStates?.chapters[index];
+                          final aya = value.chapters[index];
                           return AyaListItem(
                             aya: aya,
                           );

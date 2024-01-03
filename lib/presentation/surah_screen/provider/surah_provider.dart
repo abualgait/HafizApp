@@ -1,36 +1,33 @@
-import 'package:flutter/material.dart';
 import 'package:hafiz_app/domain/usecase/getsurah/get_surah.dart';
+import 'package:riverpod/riverpod.dart';
 
 import '../../../core/errors/failures.dart';
 import '../../../data/model/surah_response.dart';
+import '../../../injection_container.dart';
 
-class SurahProvider extends ChangeNotifier {
+final surahStateProvider =
+    StateNotifierProvider<SurahStateNotifier, SurahUIStates>((ref) {
+  return SurahStateNotifier(getSurah: sl());
+});
+
+class SurahStateNotifier extends StateNotifier<SurahUIStates> {
   final GetSurah getSurah;
 
-  SurahProvider({required this.getSurah});
-
-  SurahUIStates? surahStates = SurahUIStates();
+  SurahStateNotifier({required this.getSurah}) : super(SurahUIStates());
 
   void loadSurah(String surahId) async {
-    surahStates = surahStates?.copyWith(isLoading: true);
-    notifyListeners();
+    state = SurahUIStates(isLoading: true);
     var response = await getSurah(ParamsGetSurah(surahId: surahId));
     response.fold(
       (failure) {
         if (failure is ServerFailure) {
-          surahStates = surahStates?.copyWith(
-              error: failure.errorMessage, isLoading: false);
-          notifyListeners();
+          state = SurahUIStates(isLoading: false, error: failure.errorMessage);
         } else if (failure is ConnectionFailure) {
-          surahStates = surahStates?.copyWith(
-              error: failure.errorMessage, isLoading: false);
-          notifyListeners();
+          state = SurahUIStates(isLoading: false, error: failure.errorMessage);
         }
       },
       (data) {
-        surahStates =
-            surahStates?.copyWith(chapters: data.chapters, isLoading: false);
-        notifyListeners();
+        state = SurahUIStates(isLoading: false, chapters: data.chapters);
       },
     );
   }

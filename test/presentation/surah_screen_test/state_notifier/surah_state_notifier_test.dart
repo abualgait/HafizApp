@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hafiz_app/core/errors/failures.dart';
 import 'package:hafiz_app/data/model/surah_response.dart';
@@ -9,18 +8,16 @@ import 'package:mocktail/mocktail.dart';
 
 class MockGetSurah extends Mock implements GetSurah {}
 
-class MockObserver extends Mock implements Listenable {}
-
 void main() {
   late MockGetSurah mockGetSurah;
-  late SurahProvider surahProvider;
+  late SurahStateNotifier surahStateNotifier;
 
   setUp(() {
     mockGetSurah = MockGetSurah();
-    surahProvider = SurahProvider(getSurah: mockGetSurah);
+    surahStateNotifier = SurahStateNotifier(getSurah: mockGetSurah);
   });
 
-  tearDown(() => surahProvider.dispose());
+  tearDown(() => surahStateNotifier.dispose());
 
   group('SurahProvider Tests', () {
     test('LoadSurah success should update UI states', () async {
@@ -29,15 +26,15 @@ void main() {
           .thenAnswer((_) async => Right(ChapterResponse(chapters: chapters)));
 
       // Act
-      surahProvider.loadSurah("114");
+      surahStateNotifier.loadSurah("114");
 
       // Allow time for the asynchronous operation to complete
       await Future.delayed(Duration.zero);
 
       // Assert
-      expect(surahProvider.surahStates?.isLoading, false);
-      expect(surahProvider.surahStates?.chapters.length, 1);
-      expect(surahProvider.surahStates?.error, '');
+      expect(surahStateNotifier.state.isLoading, false);
+      expect(surahStateNotifier.state.chapters.length, 1);
+      expect(surahStateNotifier.state.error, '');
     });
 
     test('LoadSurah fail should update UI states with server error', () async {
@@ -45,15 +42,15 @@ void main() {
           .thenAnswer((_) async => Left(ServerFailure("server error")));
 
       // Act
-      surahProvider.loadSurah("-1");
+      surahStateNotifier.loadSurah("-1");
 
       // Allow time for the asynchronous operation to complete
       await Future.delayed(Duration.zero);
 
       // Assert
-      expect(surahProvider.surahStates?.isLoading, false);
-      expect(surahProvider.surahStates?.chapters.length, 0);
-      expect(surahProvider.surahStates?.error, 'server error');
+      expect(surahStateNotifier.state.isLoading, false);
+      expect(surahStateNotifier.state.chapters.length, 0);
+      expect(surahStateNotifier.state.error, 'server error');
     });
 
     test('LoadSurah fail should update UI states with connection error',
@@ -61,15 +58,15 @@ void main() {
       when(() => mockGetSurah(const ParamsGetSurah(surahId: "-2")))
           .thenAnswer((_) async => Left(ConnectionFailure()));
       // Act
-      surahProvider.loadSurah("-2");
+      surahStateNotifier.loadSurah("-2");
 
       // Allow time for the asynchronous operation to complete
       await Future.delayed(Duration.zero);
 
       // Assert
-      expect(surahProvider.surahStates?.isLoading, false);
-      expect(surahProvider.surahStates?.chapters.length, 0);
-      expect(surahProvider.surahStates?.error, messageConnectionFailure);
+      expect(surahStateNotifier.state.isLoading, false);
+      expect(surahStateNotifier.state.chapters.length, 0);
+      expect(surahStateNotifier.state.error, messageConnectionFailure);
     });
   });
 }
