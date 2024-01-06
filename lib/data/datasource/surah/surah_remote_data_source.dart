@@ -20,7 +20,7 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
         await networkManager.get('/editions/ara-quranuthmanihaf/$surahId.json');
 
     if (response.statusCode == 200) {
-      return ChapterResponse.fromJson(response.data);
+      return ChapterResponse.fromJson(response.data, surahId);
     } else {
       throw DioException;
     }

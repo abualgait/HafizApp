@@ -46,6 +46,7 @@ dependencies:
   get_it: ^7.6.4
   provider: ^6.1.1
   flutter_riverpod: ^2.4.9
+  sqflite: ^2.3.0
 
   #testing
   mocktail: ^1.0.2

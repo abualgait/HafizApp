@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+import 'package:hafiz_app/core/local/DatabaseHelper.dart';
 import 'package:hafiz_app/injection_container.dart' as di;
 import 'package:hafiz_app/presentation/home_screen/provider/home_provider.dart';
 import 'package:hafiz_app/presentation/surah_screen/provider/surah_provider.dart';
@@ -44,12 +45,14 @@ final ThemeData darkTheme = ThemeData(
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
   Future.wait([
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]),
     PrefUtils().init(),
-    di.init()
+    di.init(),
+    DatabaseHelper.database
   ]).then((value) {
     runApp(riverpod.ProviderScope(child: MyApp()));
   });

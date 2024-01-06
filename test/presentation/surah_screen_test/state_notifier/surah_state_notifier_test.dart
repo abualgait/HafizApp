@@ -22,8 +22,8 @@ void main() {
   group('SurahProvider Tests', () {
     test('LoadSurah success should update UI states', () async {
       var chapters = [Chapter(chapter: 114, verse: 1, text: "")];
-      when(() => mockGetSurah(const ParamsGetSurah(surahId: "114")))
-          .thenAnswer((_) async => Right(ChapterResponse(chapters: chapters)));
+      when(() => mockGetSurah(const ParamsGetSurah(surahId: "114"))).thenAnswer(
+          (_) async => Right(ChapterResponse(chapters: chapters, id: "114")));
 
       // Act
       surahStateNotifier.loadSurah("114");

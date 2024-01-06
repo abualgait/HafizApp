@@ -22,7 +22,7 @@ void main() {
 
   test("make sure get_surah return success", () async {
     var surahResponse =
-        ChapterResponse.fromJson(json.decode(fixture("surah_response.json")));
+        ChapterResponse.fromJson(json.decode(fixture("surah_response.json")),"114");
 
     when(() => mockSurahRepo.getSurah("114"))
         .thenAnswer((_) async => Right(surahResponse));
