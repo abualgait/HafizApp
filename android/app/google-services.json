@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "854811938553",
+    "project_id": "hafiz-app-3e264",
+    "storage_bucket": "hafiz-app-3e264.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854811938553:android:7a72ac4049b699cff65c28",
+        "android_client_info": {
+          "package_name": "com.hafiz.app.hafiz_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOjYChEXf0NJRDL7VJhDWe_xouOORsGrI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
