@@ -6,6 +6,9 @@ import 'package:hafiz_app/injection_container.dart' as di;
 import 'core/app_export.dart';
 import 'injection_container.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 final ThemeData lightTheme = ThemeData(
@@ -40,6 +43,7 @@ final ThemeData darkTheme = ThemeData(
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  initFirebase();
   Future.wait([
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -49,6 +53,13 @@ void main() {
   ]).then((value) {
     runApp(MyApp());
   });
+
+}
+
+void initFirebase() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 }
 
 class MyApp extends StatelessWidget {
