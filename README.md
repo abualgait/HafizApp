@@ -1,10 +1,13 @@
 # Hafiz Flutter App
+
 ![image](https://github.com/abualgait/HafizApp/assets/38107393/aaa45a94-030c-40fc-afb6-108bd43f8742)
 
 
 🚀 **Embark on a Flutter Journey with Holy Quran App 📖**
 
 Dive into the world of Flutter with our Hafiz app – a meticulously crafted learning journey that encapsulates essential Flutter concepts. 🌟
+
+**Google Play:** https://play.google.com/store/apps/details?id=com.hafiz.app.hafiz_app&hl=en_US
 
 🛠 **Tech Stack Highlights:**
 1. **Clean Architecture:** We've architectured the app for clarity, separation of concerns, and maintainability. Clean code is at the heart of our design, ensuring scalability and ease of collaboration.
