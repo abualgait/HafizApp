@@ -28,6 +28,9 @@ Dive into the world of Flutter with our Hafiz app – a meticulously crafted lea
 
 9. **Unit testing:** with mocktail, flutter_test and bloc_test.
 
+Figma file: https://www.figma.com/community/file/1237733090712918938/quran-mobile-app
+
+
 🌐 **Sharing the Flutter Love:**
 This Quran app is not just an app – it's a learning journey! 🚀 I have crafted it to serve as a starter template for Flutter enthusiasts, enabling them to explore and understand the core concepts of Flutter development.
 
