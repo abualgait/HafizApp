@@ -22,7 +22,12 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
     if (response.statusCode == 200) {
       return ChapterResponse.fromJson(response.data);
     } else {
-      throw DioException;
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        error: 'Unexpected status code: ${response.statusCode}',
+        type: DioExceptionType.badResponse,
+      );
     }
   }
 }

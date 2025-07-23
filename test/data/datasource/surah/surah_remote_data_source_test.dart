@@ -58,8 +58,10 @@ void main() {
 
     test("make sure get surah return failure", () async {
       setUpMockDioFailed();
-      var result = await surahRemoteDataSource.getSurah("114");
-      expect(() => result, throwsA(const TypeMatcher<DioException>()));
+      expect(
+        () => surahRemoteDataSource.getSurah("114"),
+        throwsA(isA<DioException>()),
+      );
     });
   });
 }
