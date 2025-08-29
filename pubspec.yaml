@@ -53,9 +53,10 @@ dependencies:
   #testing
   mocktail: ^1.0.2
   bloc_test: ^10.0.0
-  firebase_core: ^4.0.0
-  firebase_crashlytics: ^5.0.0
-  firebase_analytics: ^12.0.0
+  firebase_core: any
+  firebase_crashlytics: any
+  firebase_analytics: any
+  firebase_performance: any
 
 dev_dependencies:
   flutter_test:

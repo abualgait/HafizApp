@@ -11,6 +11,10 @@ import 'firebase_options.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'dart:async';
+import 'dart:ui' as ui;
 
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -127,6 +131,15 @@ class _BootstrapAppState extends State<BootstrapApp> {
         (await getApplicationDocumentsDirectory()).path,
       ),
     );
+
+    // Wire Crashlytics for Flutter & platform errors
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    ui.PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+    // Log app open for Analytics
+    unawaited(FirebaseAnalytics.instance.logAppOpen());
 
     if (mounted) {
       setState(() => _ready = true);
