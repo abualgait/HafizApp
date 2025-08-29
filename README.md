@@ -1,10 +1,13 @@
 # Hafiz Flutter App
+
 ![image](https://github.com/abualgait/HafizApp/assets/38107393/aaa45a94-030c-40fc-afb6-108bd43f8742)
 
 
 🚀 **Embark on a Flutter Journey with Holy Quran App 📖**
 
 Dive into the world of Flutter with our Hafiz app – a meticulously crafted learning journey that encapsulates essential Flutter concepts. 🌟
+
+**Google Play:** https://play.google.com/store/apps/details?id=com.hafiz.app.hafiz_app&hl=en_US
 
 🛠 **Tech Stack Highlights:**
 1. **Clean Architecture:** We've architectured the app for clarity, separation of concerns, and maintainability. Clean code is at the heart of our design, ensuring scalability and ease of collaboration.
@@ -24,6 +27,9 @@ Dive into the world of Flutter with our Hafiz app – a meticulously crafted lea
 8. **GetIt Dependency Injection:** Experience the simplicity and power of dependency injection with GetIt. Our app utilizes GetIt for efficient management of dependencies, ensuring modularity and testability.
 
 9. **Unit testing:** with mocktail, flutter_test and bloc_test.
+
+Figma file: https://www.figma.com/community/file/1237733090712918938/quran-mobile-app
+
 
 🌐 **Sharing the Flutter Love:**
 This Quran app is not just an app – it's a learning journey! 🚀 I have crafted it to serve as a starter template for Flutter enthusiasts, enabling them to explore and understand the core concepts of Flutter development.
