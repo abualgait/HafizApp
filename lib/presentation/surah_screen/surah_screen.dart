@@ -20,6 +20,7 @@ class _SurahScreenState extends State<SurahScreen>
   Surah? surah;
   final scrollCubit = sl<ScrollPositionCubit>();
   final ScrollController _scrollController = ScrollController();
+  bool _scrollRestored = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -32,13 +33,8 @@ class _SurahScreenState extends State<SurahScreen>
 
       if (surah != null) {
         surahBloc.add(LoadSurahEvent(surahId: surah?.id.toString() ?? ""));
+        if (mounted) setState(() {});
         final key = 'surah-${surah!.id}';
-        final saved = scrollCubit.getOffset(key);
-        if (saved != null && _scrollController.hasClients) {
-          try {
-            _scrollController.jumpTo(saved);
-          } catch (_) {}
-        }
         // Attach listener once we have a key
         _scrollController.addListener(() {
           scrollCubit.saveOffset(key, _scrollController.offset);
@@ -70,6 +66,19 @@ class _SurahScreenState extends State<SurahScreen>
                 } else if (state is FailureSurahState) {
                   return Center(child: Text(state.errorMessage));
                 } else {
+                  // Restore scroll position once after content is available
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!_scrollRestored && surah != null) {
+                      final saved =
+                          scrollCubit.getOffset('surah-${surah!.id}');
+                      if (saved != null && _scrollController.hasClients) {
+                        try {
+                          _scrollController.jumpTo(saved);
+                        } catch (_) {}
+                      }
+                      _scrollRestored = true;
+                    }
+                  });
                   return SizedBox(
                       width: double.maxFinite,
                       child: SingleChildScrollView(
@@ -106,18 +115,77 @@ class AyaListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = PrefUtils().getIsDarkMode();
+    // Keep a single source of truth for font size
+    const double ayahFontSize = 20;
+    const double badgeGap = 12; // visual space between last char and badge
+    final double badgeDiameter = ayahFontSize * 1.25; // scale badge with text
+
+    final Color textColor =
+        isDark ? const Color(0xFFFFFFFF) : const Color(0xFF004B40);
+    final List<Color> badgeGradient = isDark
+        ? [const Color(0xFF113C35), const Color(0xFF0B2D28)]
+        : [const Color(0xFFFAF6EB), const Color(0xFFEDE6D6)];
+    final Color badgeBorder =
+        isDark ? const Color(0xFF87D1A4) : const Color(0xFF006754);
+    final Color badgeText =
+        isDark ? const Color(0xFFFAF6EB) : const Color(0xFF004B40);
+
     return Padding(
       padding: const EdgeInsets.only(
           left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
-      child: Text(
-        aya.text,
+      child: RichText(
         textDirection: TextDirection.rtl,
-        style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Color(
-                PrefUtils().getIsDarkMode() == true ? 0xFFFFFFFF : 0xFF004B40),
-            fontFamily: "Amiri"),
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: aya.text,
+              style: TextStyle(
+                fontSize: ayahFontSize,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+                fontFamily: "Amiri",
+              ),
+            ),
+            // Add a textual space for better semantics/copying in addition to visual gap
+            const TextSpan(text: ' '),
+            const WidgetSpan(child: SizedBox(width: badgeGap)),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.baseline,
+              baseline: TextBaseline.alphabetic,
+              child: Container(
+                width: badgeDiameter,
+                height: badgeDiameter,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: badgeGradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: Border.all(color: badgeBorder, width: 1.2),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x1A000000),
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '${aya.verse}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: ayahFontSize * 0.7,
+                    fontWeight: FontWeight.w700,
+                    color: badgeText,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
