@@ -26,8 +26,9 @@ Future<void> init() async {
   sl.registerFactory(() => HomeBloc());
   sl.registerLazySingleton(() => ThemeBloc());
   sl.registerLazySingleton(() => ScrollPositionCubit());
+  // Defer Analytics creation until Firebase initializes; resolve inside observer when needed
   sl.registerLazySingleton(() => AnalyticsService());
-  sl.registerLazySingleton(() => AnalyticsRouteObserver(sl()));
+  sl.registerLazySingleton(() => AnalyticsRouteObserver());
 
   // Use Case
   sl.registerLazySingleton(() => GetSurah(surahRepository: sl()));

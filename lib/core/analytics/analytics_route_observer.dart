@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'analytics_service.dart';
+import 'package:hafiz_app/injection_container.dart';
 
 class AnalyticsRouteObserver extends RouteObserver<PageRoute<dynamic>> {
-  final AnalyticsService analytics;
-  AnalyticsRouteObserver(this.analytics);
+  AnalyticsRouteObserver();
 
   String _name(Route<dynamic> route) =>
       route.settings.name ?? route.runtimeType.toString();
@@ -11,14 +11,20 @@ class AnalyticsRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   void _start(Route<dynamic> route) {
     if (route is PageRoute) {
       final name = _name(route);
-      analytics.logScreenView(name: name, className: route.settings.name);
-      analytics.startScreenTimer(name);
+      try {
+        final analytics = sl<AnalyticsService>();
+        analytics.logScreenView(name: name, className: route.settings.name);
+        analytics.startScreenTimer(name);
+      } catch (_) {}
     }
   }
 
   void _end(Route<dynamic> route) {
     if (route is PageRoute) {
-      analytics.endScreenTimer(_name(route));
+      try {
+        final analytics = sl<AnalyticsService>();
+        analytics.endScreenTimer(_name(route));
+      } catch (_) {}
     }
   }
 
@@ -43,4 +49,3 @@ class AnalyticsRouteObserver extends RouteObserver<PageRoute<dynamic>> {
     if (newRoute != null) _start(newRoute);
   }
 }
-
