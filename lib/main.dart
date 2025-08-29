@@ -8,6 +8,9 @@ import 'injection_container.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -41,21 +44,12 @@ final ThemeData darkTheme = ThemeData(
   ),
 );
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  initFirebase();
-  Future.wait([
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]),
-    PrefUtils().init(),
-    di.init()
-  ]).then((value) {
-    runApp(MyApp());
-  });
+  runApp(const BootstrapApp());
 }
 
-void initFirebase() async {
+Future<void> initFirebase() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -95,6 +89,59 @@ class MyApp extends StatelessWidget {
             routes: AppRoutes.routes,
           );
         },
+      ),
+    );
+  }
+}
+
+class BootstrapApp extends StatefulWidget {
+  const BootstrapApp({super.key});
+
+  @override
+  State<BootstrapApp> createState() => _BootstrapAppState();
+}
+
+class _BootstrapAppState extends State<BootstrapApp> {
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await initFirebase();
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+    await PrefUtils().init();
+    await di.init();
+
+    // Initialize Hive and open cache box for repository caching
+    await Hive.initFlutter();
+    await Hive.openBox('surah_cache');
+
+    HydratedBloc.storage = await HydratedStorage.build(
+      storageDirectory: HydratedStorageDirectory(
+        (await getApplicationDocumentsDirectory()).path,
+      ),
+    );
+
+    if (mounted) {
+      setState(() => _ready = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_ready) return MyApp();
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor:
+            PrefUtils().getIsDarkMode() ? Colors.black : Colors.white,
+        body: const Center(child: CircularProgressIndicator()),
       ),
     );
   }

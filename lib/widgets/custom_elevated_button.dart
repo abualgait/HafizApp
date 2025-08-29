@@ -3,7 +3,7 @@ import 'package:hafiz_app/core/app_export.dart';
 import 'package:hafiz_app/widgets/base_button.dart';
 
 class CustomElevatedButton extends BaseButton {
-  CustomElevatedButton({
+  const CustomElevatedButton({
     super.key,
     this.decoration,
     this.leftIcon,

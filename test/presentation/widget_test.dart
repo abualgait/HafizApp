@@ -13,8 +13,8 @@ import 'package:hafiz_app/main.dart';
 void main() {
   testWidgets('Get started clicked open Home Screen',
       (WidgetTester tester) async {
-    PrefUtils().init();
-    di.init();
+    await PrefUtils().init();
+    await di.init();
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp());
 

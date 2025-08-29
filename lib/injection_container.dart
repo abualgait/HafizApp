@@ -9,10 +9,12 @@ import 'package:hafiz_app/presentation/home_screen/bloc/home_bloc.dart';
 import 'package:hafiz_app/presentation/surah_screen/bloc/surah_bloc.dart';
 
 import 'core/network/network_manager.dart';
+import 'core/scroll/scroll_position_cubit.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // Local storage for caching is initialized in main() to avoid test issues.
   /**
    * ! Features
    */
@@ -20,6 +22,7 @@ Future<void> init() async {
   sl.registerFactory(() => SurahBloc(getSurah: sl()));
   sl.registerFactory(() => HomeBloc());
   sl.registerLazySingleton(() => ThemeBloc());
+  sl.registerLazySingleton(() => ScrollPositionCubit());
 
   // Use Case
   sl.registerLazySingleton(() => GetSurah(surahRepository: sl()));

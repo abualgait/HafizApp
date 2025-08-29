@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 
 import "../../core/app_export.dart";
 import "../../core/quran_index/quran_surah.dart";
+import "../../core/scroll/scroll_position_cubit.dart";
 import "../../data/model/surah_response.dart";
 import "../../injection_container.dart";
 import "bloc/surah_bloc.dart";
@@ -13,9 +14,15 @@ class SurahScreen extends StatefulWidget {
   State<SurahScreen> createState() => _SurahScreenState();
 }
 
-class _SurahScreenState extends State<SurahScreen> {
+class _SurahScreenState extends State<SurahScreen>
+    with AutomaticKeepAliveClientMixin {
   final surahBloc = sl<SurahBloc>();
   Surah? surah;
+  final scrollCubit = sl<ScrollPositionCubit>();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -25,13 +32,31 @@ class _SurahScreenState extends State<SurahScreen> {
 
       if (surah != null) {
         surahBloc.add(LoadSurahEvent(surahId: surah?.id.toString() ?? ""));
+        final key = 'surah-${surah!.id}';
+        final saved = scrollCubit.getOffset(key);
+        if (saved != null && _scrollController.hasClients) {
+          try {
+            _scrollController.jumpTo(saved);
+          } catch (_) {}
+        }
+        // Attach listener once we have a key
+        _scrollController.addListener(() {
+          scrollCubit.saveOffset(key, _scrollController.offset);
+        });
       }
     });
     super.initState();
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SafeArea(
       child: Scaffold(
           backgroundColor: Color(
@@ -48,10 +73,15 @@ class _SurahScreenState extends State<SurahScreen> {
                   return SizedBox(
                       width: double.maxFinite,
                       child: SingleChildScrollView(
+                          controller: _scrollController,
+                          key: PageStorageKey(
+                              'surah-scroll-${surah?.id ?? 'unknown'}'),
                           child: Column(children: [
                         _buildAppBar(surah),
                         SizedBox(height: 20.v),
                         ListView.builder(
+                          key: PageStorageKey(
+                              'surah-list-${surah?.id ?? 'unknown'}'),
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: (state as SuccessSurahState).chapters.length,

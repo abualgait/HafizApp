@@ -6,6 +6,7 @@ import "../../injection_container.dart";
 import "../../widgets/custom_app_bar.dart";
 import "../../widgets/custom_elevated_button.dart";
 import "bloc/home_bloc.dart";
+import "../../core/scroll/scroll_position_cubit.dart";
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,13 +23,42 @@ Locale getCurrentLocale() {
   return AppLocalization.of().getCurrentLocale();
 }
 
-class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+class _HomeScreenState extends State<HomeScreen>
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final homeBloc = sl<HomeBloc>();
   final themeBloc = sl<ThemeBloc>();
+  final scrollCubit = sl<ScrollPositionCubit>();
+  final ScrollController _scrollController = ScrollController();
   bool isDarkMode = PrefUtils().getIsDarkMode();
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final saved = scrollCubit.getOffset('home');
+      if (saved != null && _scrollController.hasClients) {
+        try {
+          _scrollController.jumpTo(saved);
+        } catch (_) {}
+      }
+    });
+    _scrollController.addListener(() {
+      scrollCubit.saveOffset('home', _scrollController.offset);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     mediaQueryData = MediaQuery.of(context);
     return SafeArea(
       child: Scaffold(
@@ -82,11 +112,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     body: SizedBox(
                         width: double.maxFinite,
                         child: SingleChildScrollView(
+                            controller: _scrollController,
+                            key: const PageStorageKey('home-scroll'),
                             child: Column(children: [
                           (state as UpdateLastReadSurah).surah != null
                               ? _buildCardLastRead((state).surah)
                               : const SizedBox.shrink(),
                           ListView.builder(
+                            key: const PageStorageKey('home-list'),
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: QuranIndex.quranSurahs.length,

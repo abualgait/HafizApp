@@ -1,6 +1,6 @@
 //ignore: unused_import
 import 'dart:convert';
-
+import 'package:flutter/foundation.dart';
 import 'package:hafiz_app/core/quran_index/quran_surah.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,7 +16,7 @@ class PrefUtils {
 
   Future<void> init() async {
     _sharedPreferences ??= await SharedPreferences.getInstance();
-    print('SharedPreference Initialized');
+    debugPrint('SharedPreference Initialized');
   }
 
   ///will clear all the data stored in preference

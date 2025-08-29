@@ -46,6 +46,10 @@ dependencies:
   dio: ^5.0.3
   dartz: ^0.10.1
   get_it: ^8.2.0
+  hydrated_bloc: ^10.1.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.4
   #testing
   mocktail: ^1.0.2
   bloc_test: ^10.0.0
@@ -92,4 +96,3 @@ flutter:
           weight: 700
         - asset: assets/fonts/AmiriRegular.ttf
           weight: 400
-
