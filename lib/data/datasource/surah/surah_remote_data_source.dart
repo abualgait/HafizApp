@@ -16,11 +16,38 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
 
   @override
   Future<ChapterResponse> getSurah(String surahId) async {
-    var response =
-        await networkManager.get('/editions/ara-quranuthmanihaf/$surahId.json');
+    // Quran.com API v4: verses by chapter with Uthmani text
+    // Docs: https://api.quran.com/api/v4/
+    var response = await networkManager.get(
+      '/verses/by_chapter/$surahId',
+      params: {
+        'per_page': 300,
+        'words': 'false',
+        'fields': 'chapter_id,verse_key,text_uthmani',
+      },
+    );
 
     if (response.statusCode == 200) {
-      return ChapterResponse.fromJson(response.data);
+      final data = response.data;
+      // Support both legacy shape {"chapter": [...]} and Quran.com {"verses": [...]}
+      if (data is Map && data.containsKey('chapter')) {
+        return ChapterResponse.fromJson(
+            Map<String, dynamic>.from(data as Map<dynamic, dynamic>));
+      }
+
+      final verses = (data['verses'] as List<dynamic>?) ?? const [];
+      final chapters = verses.map((v) {
+        final m = v as Map<String, dynamic>;
+        final verseNumber = m['verse_number'] as int? ??
+            int.tryParse(((m['verse_key'] as String?) ?? '0:0').split(':').last) ??
+            0;
+        return Chapter(
+          chapter: (m['chapter_id'] as num?)?.toInt() ?? int.parse(surahId),
+          verse: verseNumber,
+          text: (m['text_uthmani'] as String?) ?? '',
+        );
+      }).toList();
+      return ChapterResponse(chapters: chapters);
     } else {
       throw DioException(
         requestOptions: response.requestOptions,

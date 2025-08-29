@@ -66,6 +66,13 @@ class _HomeScreenState extends State<HomeScreen>
             PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
         appBar: CustomAppBar(
             actions: [
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                color: isDarkMode ? Colors.white : const Color(0xFF004B40),
+                onPressed: () {
+                  NavigatorService.pushNamed(AppRoutes.aboutPage);
+                },
+              ),
               Row(
                 children: [
                   Icon(

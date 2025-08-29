@@ -36,3 +36,41 @@ This Quran app is not just an app – it's a learning journey! 🚀 I have craft
 
 Let's Flutter together and create remarkable experiences! 🚀✨
 
+## Acknowledgements
+
+- Original idea and initial project by: https://github.com/abualgait
+- Source repository: https://github.com/abualgait/HafizApp
+
+This build includes small fixes and updates by the current maintainer. The app is non‑profit and intended as a good deed for us and our families.
+
+## Quran Text Source & Integrity
+
+- The Arabic Quran text is bundled locally in the app to avoid tampering and to work fully offline.
+- Local files live under `assets/quran/uthmani/` as per‑surah JSON: `surah_<1..114>.json`.
+- Each file uses this schema:
+
+```json
+{
+  "chapter": [
+    {"chapter": 1, "verse": 1, "text": "..."},
+    {"chapter": 1, "verse": 2, "text": "..."}
+  ]
+}
+```
+
+- A remote fallback (Quran.com API v4) is only used if a local file is missing.
+
+### Preparing Local Assets (Tanzil)
+
+1. Download the verified Uthmani text from Tanzil: https://tanzil.net/download/
+   - e.g., `quran-uthmani.txt` where each line is `SURA|AYA|TEXT` (e.g., `1|1|بِسْمِ اللَّهِ ...`).
+2. Generate per‑surah JSON files:
+   - `dart run tool/generate_quran_assets.dart /path/to/quran-uthmani.txt assets/quran/uthmani`
+3. Ensure `pubspec.yaml` includes the `assets/` directory (already configured).
+
+Note: Tanzil’s license is CC BY‑ND 3.0. Do not modify the Quran text. Include attribution when distributing.
+
+## About Screen
+
+An in‑app About page includes acknowledgements and intent. You can find it via the info icon on the Home screen.
+
