@@ -176,7 +176,27 @@ class _BootstrapAppState extends State<BootstrapApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (_ready) return MyApp();
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: _ready
+          ? const _ReadyApp()
+          : const _SplashScaffold(),
+    );
+  }
+}
+
+class _ReadyApp extends StatelessWidget {
+  const _ReadyApp();
+  @override
+  Widget build(BuildContext context) => MyApp();
+}
+
+class _SplashScaffold extends StatelessWidget {
+  const _SplashScaffold();
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(

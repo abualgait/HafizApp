@@ -255,6 +255,7 @@ class _HomeScreenState extends State<HomeScreen>
                                       arguments: {
                                         'surah': lastReadSurah,
                                         if (offset != null) 'offset': offset,
+                                        'resume': true,
                                         if (verseIndex != null)
                                           'verseIndex': verseIndex,
                                       },

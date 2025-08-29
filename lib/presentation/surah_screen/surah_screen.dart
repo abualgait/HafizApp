@@ -27,6 +27,7 @@ class _SurahScreenState extends State<SurahScreen>
       ItemPositionsListener.create();
   bool _scrolledOnce = false;
   bool _hasSavedResume = false;
+  bool resumeRequested = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -44,6 +45,8 @@ class _SurahScreenState extends State<SurahScreen>
         if (off is num) initialOffset = off.toDouble();
         final vi = args['verseIndex'];
         if (vi is int) initialVerseIndex = vi;
+        final r = args['resume'];
+        if (r is bool) resumeRequested = r;
       }
 
       if (surah != null) {
@@ -60,6 +63,10 @@ class _SurahScreenState extends State<SurahScreen>
               .index;
           final verseIndex = (min - 1).clamp(0, 10000);
           PrefUtils().setSurahVerseIndex(surah!.id, verseIndex);
+          final show = verseIndex > 0;
+          if (show != _hasSavedResume && mounted) {
+            setState(() => _hasSavedResume = show);
+          }
         });
         // Check saved resume index to display FAB
         final savedIndex = initialVerseIndex ??
@@ -99,24 +106,45 @@ class _SurahScreenState extends State<SurahScreen>
                 } else if (state is FailureSurahState) {
                   return Center(child: Text(state.errorMessage));
                 } else {
-                  // Scroll to saved verse index once
+                  final chapters = (state as SuccessSurahState).chapters;
+                  // Scroll to saved verse index once (after list is attached)
                   WidgetsBinding.instance.addPostFrameCallback((_) async {
-                    if (!_scrolledOnce && surah != null) {
-                      final savedIndex = initialVerseIndex ??
-                          PrefUtils().getSurahVerseIndex(surah!.id);
-                      if (savedIndex != null && savedIndex >= 0) {
-                        try {
-                          await _itemScrollController.scrollTo(
-                            index: savedIndex + 1, // +1 to account for header
-                            duration: const Duration(milliseconds: 350),
-                            curve: Curves.easeOutCubic,
-                          );
-                        } catch (_) {}
-                      }
+                    if (_scrolledOnce || surah == null || !resumeRequested) return;
+                    if (chapters.isEmpty) return;
+
+                    // Ensure list has attached at least one position
+                    final hasAttachment =
+                        _itemPositionsListener.itemPositions.value.isNotEmpty;
+                    if (!hasAttachment) {
+                      // Retry next frame
+                      WidgetsBinding.instance
+                          .addPostFrameCallback((_) {});
+                      return;
+                    }
+
+                    final savedIndex = initialVerseIndex ??
+                        PrefUtils().getSurahVerseIndex(surah!.id);
+                    if (savedIndex == null || savedIndex < 0) return;
+
+                    final maxVerse = chapters.length - 1;
+                    final clampedVerse = savedIndex > maxVerse
+                        ? maxVerse
+                        : savedIndex;
+                    final target = clampedVerse + 1; // header at 0
+                    try {
+                      await _itemScrollController.scrollTo(
+                        index: target,
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOutCubic,
+                        alignment: 0.0,
+                      );
                       _scrolledOnce = true;
+                    } catch (_) {
+                      // Retry on next frame if the list wasn't ready yet
+                      WidgetsBinding.instance
+                          .addPostFrameCallback((_) {});
                     }
                   });
-                  final chapters = (state as SuccessSurahState).chapters;
                   return Stack(children: [
                     ScrollablePositionedList.builder(
                       itemScrollController: _itemScrollController,
@@ -135,27 +163,40 @@ class _SurahScreenState extends State<SurahScreen>
                         return AyaListItem(aya: aya);
                       },
                     ),
-                    if (_hasSavedResume)
-                      Positioned(
-                        right: 16,
-                        bottom: 16,
-                        child: FloatingActionButton.extended(
-                          onPressed: () async {
+                    // One-time auto scroll overlay to ensure list is laid out
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Builder(builder: (context) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) async {
+                            if (_scrolledOnce || surah == null || !resumeRequested) return;
+                            if (chapters.isEmpty) return; // nothing to scroll
+                            // Ensure the list has attached and produced positions
+                            final attached = _itemPositionsListener.itemPositions.value.isNotEmpty;
+                            if (!attached) return; // keep at top (header)
                             final savedIndex = initialVerseIndex ??
                                 PrefUtils().getSurahVerseIndex(surah!.id);
-                            if (savedIndex != null && savedIndex >= 0) {
+                            if (savedIndex == null || savedIndex <= 0) {
+                              // 0 or null -> keep at beginning
+                              _scrolledOnce = true;
+                              return;
+                            }
+                            final maxVerse = chapters.length - 1;
+                            final clampedVerse = savedIndex > maxVerse ? maxVerse : savedIndex;
+                            final target = clampedVerse + 1; // +1 header
+                            try {
                               await _itemScrollController.scrollTo(
-                                index: savedIndex + 1,
+                                index: target,
                                 duration: const Duration(milliseconds: 350),
                                 curve: Curves.easeOutCubic,
+                                alignment: 0.0,
                               );
-                              if (mounted) setState(() => _hasSavedResume = false);
-                            }
-                          },
-                          icon: const Icon(Icons.play_arrow),
-                          label: Text('lbl_continue'.tr),
-                        ),
+                            } catch (_) {}
+                            _scrolledOnce = true;
+                          });
+                          return const SizedBox.shrink();
+                        }),
                       ),
+                    ),
                   ]);
                 }
               }))),
