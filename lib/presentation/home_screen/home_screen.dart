@@ -7,6 +7,7 @@ import "../../widgets/custom_app_bar.dart";
 import "../../widgets/custom_elevated_button.dart";
 import "bloc/home_bloc.dart";
 import "../../core/scroll/scroll_position_cubit.dart";
+import "../../core/i18n/locale_controller.dart";
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,15 +66,11 @@ class _HomeScreenState extends State<HomeScreen>
         backgroundColor: Color(
             PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
         appBar: CustomAppBar(
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.info_outline),
-                color: isDarkMode ? Colors.white : const Color(0xFF004B40),
-                onPressed: () {
-                  NavigatorService.pushNamed(AppRoutes.aboutPage);
-                },
-              ),
-              Row(
+            leadingWidth: 160,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.wb_sunny,
@@ -87,7 +84,6 @@ class _HomeScreenState extends State<HomeScreen>
                         PrefUtils().setIsDarkMode(value);
                         themeBloc.add(ToggleThemeEvent());
                       });
-                      // Add logic to toggle theme here
                     },
                     activeTrackColor: Colors.grey[700],
                     activeThumbColor: Colors.grey,
@@ -97,7 +93,30 @@ class _HomeScreenState extends State<HomeScreen>
                     color: isDarkMode ? Colors.blue : Colors.grey,
                   ),
                 ],
-              )
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.public),
+                color: isDarkMode ? Colors.white : const Color(0xFF004B40),
+                onPressed: () {
+                  final current = getCurrentLocale();
+                  final next = current.languageCode == 'ar'
+                      ? const Locale('en', 'US')
+                      : const Locale('ar', 'EG');
+                  changeLocale(context, next);
+                  LocaleController.setLocale(next);
+                  setState(() {});
+                },
+                tooltip: 'Language',
+              ),
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                color: isDarkMode ? Colors.white : const Color(0xFF004B40),
+                onPressed: () {
+                  NavigatorService.pushNamed(AppRoutes.aboutPage);
+                },
+              ),
             ],
             title: Center(
               child: Text(
@@ -211,9 +230,16 @@ class _HomeScreenState extends State<HomeScreen>
                               CustomElevatedButton(
                                   height: 31,
                                   onPressed: () {
+                                    final offset =
+                                        sl<ScrollPositionCubit>()
+                                            .getOffset('surah-${lastReadSurah?.id}');
                                     NavigatorService.pushNamed(
-                                        AppRoutes.surahPage,
-                                        arguments: lastReadSurah);
+                                      AppRoutes.surahPage,
+                                      arguments: {
+                                        'surah': lastReadSurah,
+                                        if (offset != null) 'offset': offset,
+                                      },
+                                    );
                                   },
                                   rightIcon: const Padding(
                                     padding: EdgeInsets.only(left: 8.0),
@@ -281,6 +307,7 @@ class SurahListItem extends StatelessWidget {
       child: Column(
         children: [
           Row(
+            textDirection: TextDirection.ltr, // Force LTR order regardless of app locale
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Card(
@@ -302,18 +329,23 @@ class SurahListItem extends StatelessWidget {
                 child: Text(
                   nameEnglish,
                   style: const TextStyle(fontSize: 18),
+                  textAlign: TextAlign.left,
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                nameArabic,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(PrefUtils().getIsDarkMode() == true
-                        ? 0xFFD9D8D8
-                        : 0xFF076C58),
-                    fontFamily: "Amiri"),
+              Hero(
+                tag: 'surah-title-$surahId',
+                child: Text(
+                  nameArabic,
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(PrefUtils().getIsDarkMode() == true
+                          ? 0xFFD9D8D8
+                          : 0xFF076C58),
+                      fontFamily: "Amiri"),
+                ),
               ),
             ],
           ),

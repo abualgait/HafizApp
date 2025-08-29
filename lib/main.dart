@@ -15,37 +15,44 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'core/i18n/locale_controller.dart';
 
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 final ThemeData lightTheme = ThemeData(
-  brightness: Brightness.light,
-  primaryColor: Colors.blue,
-  scaffoldBackgroundColor: Colors.white,
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.blue,
+  useMaterial3: true,
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color(0xFF006754), // deep green accent
+    brightness: Brightness.light,
   ),
-  textTheme: const TextTheme(
-    displayLarge: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-    titleLarge: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-    bodyMedium: TextStyle(fontSize: 16.0),
+  pageTransitionsTheme: const PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+    },
   ),
+  appBarTheme: const AppBarTheme(centerTitle: true),
 );
 
 final ThemeData darkTheme = ThemeData(
-  brightness: Brightness.dark,
-  primaryColor: Colors.indigo,
-  scaffoldBackgroundColor: Colors.grey[900],
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.indigo,
+  useMaterial3: true,
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color(0xFF87D1A4), // soft green tint for dark
+    brightness: Brightness.dark,
   ),
-  textTheme: const TextTheme(
-    displayLarge: TextStyle(
-        fontSize: 72.0, fontWeight: FontWeight.bold, color: Colors.white),
-    titleLarge: TextStyle(
-        fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white),
-    bodyMedium: TextStyle(fontSize: 16.0, color: Colors.white),
+  pageTransitionsTheme: const PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+    },
   ),
+  appBarTheme: const AppBarTheme(centerTitle: true),
 );
 
 Future<void> main() async {
@@ -74,24 +81,27 @@ class MyApp extends StatelessWidget {
       create: (context) => themeBloc,
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
-          return MaterialApp(
-            theme: _getTheme(context),
-            locale: const Locale('ar', 'EG'),
-            title: 'Hafiz',
-            navigatorKey: NavigatorService.navigatorKey,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              AppLocalizationDelegate(),
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale("en", "US"),
-              Locale("ar", "EG"),
-            ],
-            initialRoute: AppRoutes.onboardingScreen,
-            routes: AppRoutes.routes,
+          return ValueListenableBuilder<Locale>(
+            valueListenable: LocaleController.notifier,
+            builder: (_, locale, __) => MaterialApp(
+              theme: _getTheme(context),
+              locale: locale,
+              title: 'Hafiz',
+              navigatorKey: NavigatorService.navigatorKey,
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: const [
+                AppLocalizationDelegate(),
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale("en", "US"),
+                Locale("ar", "EG"),
+              ],
+              initialRoute: AppRoutes.onboardingScreen,
+              routes: AppRoutes.routes,
+            ),
           );
         },
       ),

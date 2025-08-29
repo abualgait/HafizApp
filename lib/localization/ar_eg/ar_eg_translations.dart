@@ -1,9 +1,9 @@
 final Map<String, String> arEg = {
   "app_name": "حافظ",
-  "lbl_learn_quran": "تعلم القران وأقرأ كل يوم",
-  "lbl_get_started": "هيا نبدأ",
-  "lbl_last_read": "اخر تلاوة",
-  "lbl_continue": "أستمر",
+  "lbl_learn_quran": "تعلّم القرآن وتلاوته يوميًا",
+  "lbl_get_started": "ابدأ",
+  "lbl_last_read": "آخر قراءة",
+  "lbl_continue": "متابعة",
   "lbl_surah": "سورة",
   // About
   "about_title": "عن تطبيق حافظ",
@@ -14,5 +14,11 @@ final Map<String, String> arEg = {
   "about_maintainer_note": "يتضمن هذا الإصدار بعض الإصلاحات والتحديثات من القائم الحالي على الصيانة.",
   "about_integrity_heading": "سلامة نص القرآن",
   "about_integrity_body": "يتم تضمين نص القرآن الكريم عربيًا محليًا من مصدر موثوق لمنع العبث والعمل دون اتصال. في حال وجود أي ملاحظة نرجو إبلاغنا لتصحيحها بسرعة.",
+  "about_language_title": "اللغة",
+  "about_sources_title": "المصادر",
+  "about_source_quran_api": "واجهة برمجة Quran.com الإصدار 4 — https://api.quran.com/api/v4",
+  "about_source_tanzil": "نص عثماني مُعتمد من Tanzil — https://tanzil.net/download/",
+  "about_feedback_title": "إرسال ملاحظة",
+  "about_feedback_desc": "أبلغ عن مشكلة أو اقترح تحسينًا عبر البريد الإلكتروني.",
   "lbl_copied": "تم النسخ"
 };

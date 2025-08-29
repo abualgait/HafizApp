@@ -11,23 +11,25 @@ import '../../model/surah_response.dart';
 
 class SurahRepositoryImpl implements SurahRepository {
   final SurahRemoteDataSource surahRemoteDataSource;
-  final SurahLocalDataSource surahLocalDataSource;
+  final SurahLocalDataSource? surahLocalDataSource;
   final NetworkInfo networkInfo;
 
   SurahRepositoryImpl({
     required this.surahRemoteDataSource,
-    required this.surahLocalDataSource,
+    this.surahLocalDataSource,
     required this.networkInfo,
   });
 
   @override
   Future<Either<Failure, ChapterResponse>> getSurah(String surahId) async {
     // Attempt local (bundled) text first
-    try {
-      final local = await surahLocalDataSource.getSurah(surahId);
-      return Right(local);
-    } catch (_) {
-      // If not found locally, proceed to cache/network
+    if (surahLocalDataSource != null) {
+      try {
+        final local = await surahLocalDataSource!.getSurah(surahId);
+        return Right(local);
+      } catch (_) {
+        // If not found locally, proceed to cache/network
+      }
     }
 
     // Attempt to serve from cache first

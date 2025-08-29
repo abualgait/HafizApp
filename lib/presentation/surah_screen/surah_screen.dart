@@ -18,6 +18,7 @@ class _SurahScreenState extends State<SurahScreen>
     with AutomaticKeepAliveClientMixin {
   final surahBloc = sl<SurahBloc>();
   Surah? surah;
+  double? initialOffset;
   final scrollCubit = sl<ScrollPositionCubit>();
   final ScrollController _scrollController = ScrollController();
   bool _scrollRestored = false;
@@ -28,8 +29,15 @@ class _SurahScreenState extends State<SurahScreen>
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Retrieve the data from the arguments
-      surah = ModalRoute.of(context)!.settings.arguments as Surah?;
+      // Retrieve the data from the arguments (supports Surah or {surah, offset})
+      final args = ModalRoute.of(context)!.settings.arguments;
+      if (args is Surah) {
+        surah = args;
+      } else if (args is Map) {
+        surah = args['surah'] as Surah?;
+        final off = args['offset'];
+        if (off is num) initialOffset = off.toDouble();
+      }
 
       if (surah != null) {
         surahBloc.add(LoadSurahEvent(surahId: surah?.id.toString() ?? ""));
@@ -54,7 +62,14 @@ class _SurahScreenState extends State<SurahScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return SafeArea(
-      child: Scaffold(
+      child: WillPopScope(
+        onWillPop: () async {
+          if (surah != null) {
+            scrollCubit.saveOffset('surah-${surah!.id}', _scrollController.offset);
+          }
+          return true;
+        },
+        child: Scaffold(
           backgroundColor: Color(
               PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
           body: BlocProvider<SurahBloc>(
@@ -69,7 +84,7 @@ class _SurahScreenState extends State<SurahScreen>
                   // Restore scroll position once after content is available
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (!_scrollRestored && surah != null) {
-                      final saved =
+                      final saved = initialOffset ??
                           scrollCubit.getOffset('surah-${surah!.id}');
                       if (saved != null && _scrollController.hasClients) {
                         try {
@@ -104,6 +119,7 @@ class _SurahScreenState extends State<SurahScreen>
                       ])));
                 }
               }))),
+      ),
     );
   }
 }
@@ -233,14 +249,17 @@ Widget _buildAppBar(Surah? surah) {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      surah?.nameArabic ?? "",
-                      textDirection: TextDirection.rtl,
-                      style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          fontFamily: "Amiri"),
+                    Hero(
+                      tag: 'surah-title-${surah?.id ?? 'unknown'}',
+                      child: Text(
+                        surah?.nameArabic ?? "",
+                        textDirection: TextDirection.rtl,
+                        style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            fontFamily: "Amiri"),
+                      ),
                     ),
                     surah?.id == 9
                         ? const SizedBox.shrink()

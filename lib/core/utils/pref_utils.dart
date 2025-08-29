@@ -49,4 +49,17 @@ class PrefUtils {
     final String? jsonString = _sharedPreferences!.getString('surah');
     return jsonString != null ? Surah.fromJson(jsonString) : null;
   }
+
+  // Locale persistence (ar/en)
+  Future<void> setLocaleCode(String code) async {
+    await _sharedPreferences!.setString('localeCode', code);
+  }
+
+  String getLocaleCode() {
+    try {
+      return _sharedPreferences!.getString('localeCode') ?? 'ar';
+    } catch (_) {
+      return 'ar';
+    }
+  }
 }
