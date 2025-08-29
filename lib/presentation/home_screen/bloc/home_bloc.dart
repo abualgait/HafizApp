@@ -14,7 +14,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeEvent>(_onEvent);
   }
 
-  _onEvent(
+  Future<void> _onEvent(
     HomeEvent event,
     Emitter<HomeState> emit,
   ) async {

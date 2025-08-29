@@ -16,7 +16,7 @@ final ThemeData lightTheme = ThemeData(
   primaryColor: Colors.blue,
   scaffoldBackgroundColor: Colors.white,
   appBarTheme: const AppBarTheme(
-    color: Colors.blue,
+    backgroundColor: Colors.blue,
   ),
   textTheme: const TextTheme(
     displayLarge: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
@@ -30,7 +30,7 @@ final ThemeData darkTheme = ThemeData(
   primaryColor: Colors.indigo,
   scaffoldBackgroundColor: Colors.grey[900],
   appBarTheme: const AppBarTheme(
-    color: Colors.indigo,
+    backgroundColor: Colors.indigo,
   ),
   textTheme: const TextTheme(
     displayLarge: TextStyle(
@@ -53,7 +53,6 @@ void main() {
   ]).then((value) {
     runApp(MyApp());
   });
-
 }
 
 void initFirebase() async {

@@ -4,30 +4,20 @@ import 'package:hafiz_app/widgets/base_button.dart';
 
 class CustomElevatedButton extends BaseButton {
   CustomElevatedButton({
-    Key? key,
+    super.key,
     this.decoration,
     this.leftIcon,
     this.rightIcon,
-    EdgeInsets? margin,
-    VoidCallback? onPressed,
-    ButtonStyle? buttonStyle,
-    Alignment? alignment,
-    TextStyle? buttonTextStyle,
-    bool? isDisabled,
-    double? height,
-    double? width,
-    required String text,
-  }) : super(
-          text: text,
-          onPressed: onPressed,
-          buttonStyle: buttonStyle,
-          isDisabled: isDisabled,
-          buttonTextStyle: buttonTextStyle,
-          height: height,
-          width: width,
-          alignment: alignment,
-          margin: margin,
-        );
+    super.margin,
+    super.onPressed,
+    super.buttonStyle,
+    super.alignment,
+    super.buttonTextStyle,
+    super.isDisabled,
+    super.height,
+    super.width,
+    required super.text,
+  });
 
   final BoxDecoration? decoration;
 

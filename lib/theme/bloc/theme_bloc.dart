@@ -14,7 +14,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     on<ThemeEvent>(_changeTheme);
   }
 
-  _changeTheme(
+  Future<void> _changeTheme(
     ThemeEvent event,
     Emitter<ThemeState> emit,
   ) async {

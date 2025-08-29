@@ -33,9 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(
-            PrefUtils().getIsDarkMode() == true ?
-            0xFF000000 :
-            0xFFFFFFFF),
+            PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
         appBar: CustomAppBar(
             actions: [
               Row(
@@ -55,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       // Add logic to toggle theme here
                     },
                     activeTrackColor: Colors.grey[700],
-                    activeColor: Colors.grey,
+                    activeThumbColor: Colors.grey,
                   ),
                   Icon(
                     Icons.nightlight_round,
@@ -187,9 +185,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   text: "lbl_continue".tr,
                                   buttonStyle: ButtonStyle(
                                     backgroundColor:
-                                        MaterialStateProperty.all<Color>(
+                                        WidgetStateProperty.all<Color>(
                                             const Color(0xFFFAF6EB)),
-                                    shape: MaterialStateProperty.all<
+                                    shape: WidgetStateProperty.all<
                                         RoundedRectangleBorder>(
                                       RoundedRectangleBorder(
                                         borderRadius:

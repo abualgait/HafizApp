@@ -1,0 +1,15 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (88.0.0 available)
+  analyzer 7.7.1 (8.1.1 available)
+  characters 1.4.0 (1.4.1 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.16.0 (1.17.0 available)
+  test 1.26.2 (1.26.3 available)
+  test_api 0.7.6 (0.7.7 available)
+  test_core 0.6.11 (0.6.12 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleRelease'...                        
+Running Gradle task 'assembleRelease'...                            7.9s

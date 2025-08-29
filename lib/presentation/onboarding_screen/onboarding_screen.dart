@@ -26,13 +26,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   void initState() {
-    networkInfo.onConnectivityChanged.listen((ConnectivityResult result) {
+    networkInfo.onConnectivityChanged.listen((List<ConnectivityResult> results) {
       setState(() {
-        if (result == ConnectivityResult.none) {
-          isConnected = false;
-        } else {
-          isConnected = true;
-        }
+        isConnected = results.any((r) => r != ConnectivityResult.none);
       });
     });
     super.initState();
@@ -140,9 +136,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       text: "lbl_get_started".tr,
                                       buttonStyle: ButtonStyle(
                                         backgroundColor:
-                                            MaterialStateProperty.all<Color>(
+                                            WidgetStateProperty.all<Color>(
                                                 const Color(0xFFFAF6EB)),
-                                        shape: MaterialStateProperty.all<
+                                        shape: WidgetStateProperty.all<
                                             RoundedRectangleBorder>(
                                           RoundedRectangleBorder(
                                             borderRadius:

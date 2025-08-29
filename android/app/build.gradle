@@ -34,12 +34,12 @@ android {
     ndkVersion flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '21'
     }
 
     sourceSets {
@@ -73,6 +73,12 @@ android {
 
 flutter {
     source '../..'
+}
+
+// Use JDK 21 for Kotlin compilation while targeting JVM 17 bytecode
+// to maintain Android toolchain compatibility.
+kotlin {
+    jvmToolchain(21)
 }
 
 dependencies {}

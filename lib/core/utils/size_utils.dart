@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 // This functions are responsible to make UI responsive across all the mobile devices.
 
-MediaQueryData mediaQueryData = MediaQueryData.fromWindow(ui.window);
+MediaQueryData mediaQueryData = MediaQueryData.fromView(ui.window);
 
 // These are the Viewport values of your Figma Design.
 // These are used in the code as a reference to create your UI Responsively.
@@ -14,12 +14,12 @@ const num FIGMA_DESIGN_STATUS_BAR = 0;
 ///This extension is used to set padding/margin (for the top and bottom side) & height of the screen or widget according to the Viewport height.
 extension ResponsiveExtension on num {
   ///This method is used to get device viewport width.
-  get _width {
+  double get _width {
     return mediaQueryData.size.width;
   }
 
   ///This method is used to get device viewport height.
-  get _height {
+  num get _height {
     num statusBar = mediaQueryData.viewPadding.top;
     num bottomBar = mediaQueryData.viewPadding.bottom;
     num screenHeight = mediaQueryData.size.height - statusBar - bottomBar;
@@ -47,6 +47,6 @@ extension ResponsiveExtension on num {
 extension FormatExtension on double {
   /// Return a [double] value with formatted according to provided fractionDigits
   double toDoubleValue({int fractionDigits = 2}) {
-    return double.parse(this.toStringAsFixed(fractionDigits));
+    return double.parse(toStringAsFixed(fractionDigits));
   }
 }

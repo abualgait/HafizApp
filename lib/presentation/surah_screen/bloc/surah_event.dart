@@ -2,7 +2,6 @@
 
 part of 'surah_bloc.dart';
 
-
 abstract class SurahEvent extends Equatable {
   const SurahEvent();
 }
@@ -10,7 +9,7 @@ abstract class SurahEvent extends Equatable {
 class LoadSurahEvent extends SurahEvent {
   final String surahId;
 
-  LoadSurahEvent({required this.surahId});
+  const LoadSurahEvent({required this.surahId});
 
   @override
   List<Object> get props => [surahId];
