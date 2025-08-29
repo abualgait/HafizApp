@@ -18,6 +18,7 @@ final Map<String, String> enUs = {
   "about_sources_title": "Sources",
   "about_source_quran_api": "Quran.com API v4 — https://api.quran.com/api/v4",
   "about_source_tanzil": "Tanzil verified Uthmani text — https://tanzil.net/download/",
+  "lbl_ayah": "Ayah",
   "about_feedback_title": "Send Feedback",
   "about_feedback_desc": "Report an issue or suggest an improvement via email.",
   "about_feedback_hint": "Describe your issue or suggestion...",

@@ -18,6 +18,7 @@ final Map<String, String> arEg = {
   "about_sources_title": "المصادر",
   "about_source_quran_api": "واجهة برمجة Quran.com الإصدار 4 — https://api.quran.com/api/v4",
   "about_source_tanzil": "نص عثماني مُعتمد من Tanzil — https://tanzil.net/download/",
+  "lbl_ayah": "آية",
   "about_feedback_title": "إرسال ملاحظة",
   "about_feedback_desc": "أبلغ عن مشكلة أو اقترح تحسينًا عبر البريد الإلكتروني.",
   "about_feedback_hint": "اكتب مشكلتك أو اقتراحك...",
