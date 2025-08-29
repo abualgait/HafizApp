@@ -76,6 +76,7 @@ class MyApp extends StatelessWidget {
         builder: (context, state) {
           return MaterialApp(
             theme: _getTheme(context),
+            locale: const Locale('ar', 'EG'),
             title: 'Hafiz',
             navigatorKey: NavigatorService.navigatorKey,
             debugShowCheckedModeBanner: false,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../core/app_export.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -8,53 +10,54 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = PrefUtils().getIsDarkMode();
+    final linkStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: isDark ? const Color(0xFF87D1A4) : const Color(0xFF006754),
+      decoration: TextDecoration.underline,
+    );
+
+    Future<void> copy(String text) async {
+      await Clipboard.setData(ClipboardData(text: text));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('lbl_copied'.tr)),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text('About Hafiz App')),
+      appBar: AppBar(title: Text('about_title'.tr)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            Text(
-              'Hafiz App',
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
+            Text('app_name'.tr,
+                style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            const Text(
-              'This app is non‑profit and intended as a good deed for us and our families. '
-              'We aim to provide a respectful, reliable Quran reading experience.',
-              textAlign: TextAlign.center,
-            ),
+            Text('about_intro'.tr, textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            Text('Acknowledgements', style: theme.textTheme.titleMedium),
+            Text('about_ack_heading'.tr, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
-            const Text(
-              'Original idea and initial project by: ',
-            ),
-            const SelectableText(
-              'https://github.com/abualgait',
-              style: TextStyle(decoration: TextDecoration.underline),
-            ),
-            const SizedBox(height: 4),
-            const SelectableText(
-              'Project repo: https://github.com/abualgait/HafizApp',
-              style: TextStyle(decoration: TextDecoration.underline),
+            Text('about_ack_idea_by'.tr),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onLongPress: () => copy('https://github.com/abualgait'),
+              child: Text('https://github.com/abualgait', style: linkStyle),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'This version includes small fixes and updates by the current maintainer.',
+            GestureDetector(
+              onLongPress: () => copy('https://github.com/abualgait/HafizApp'),
+              child: Text('about_repo_prefix'.tr +
+                  ' https://github.com/abualgait/HafizApp', style: linkStyle),
             ),
+            const SizedBox(height: 8),
+            Text('about_maintainer_note'.tr),
             const SizedBox(height: 24),
-            Text('Quran Text Integrity', style: theme.textTheme.titleMedium),
+            Text('about_integrity_heading'.tr,
+                style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
-            const Text(
-              'Arabic Quran text is bundled locally from a verified source to prevent tampering and to work offline. '
-              'If you find any issue, please report it so we can correct it swiftly.',
-            ),
+            Text('about_integrity_body'.tr),
           ],
         ),
       ),
     );
   }
 }
-
