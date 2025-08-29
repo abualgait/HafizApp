@@ -32,7 +32,7 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
       // Support both legacy shape {"chapter": [...]} and Quran.com {"verses": [...]}
       if (data is Map && data.containsKey('chapter')) {
         return ChapterResponse.fromJson(
-            Map<String, dynamic>.from(data as Map<dynamic, dynamic>));
+            Map<String, dynamic>.from(data));
       }
 
       final verses = (data['verses'] as List<dynamic>?) ?? const [];

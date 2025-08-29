@@ -6,6 +6,7 @@ import "../../core/scroll/scroll_position_cubit.dart";
 import "../../data/model/surah_response.dart";
 import "../../injection_container.dart";
 import "bloc/surah_bloc.dart";
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class SurahScreen extends StatefulWidget {
   const SurahScreen({super.key});
@@ -19,9 +20,13 @@ class _SurahScreenState extends State<SurahScreen>
   final surahBloc = sl<SurahBloc>();
   Surah? surah;
   double? initialOffset;
+  int? initialVerseIndex;
   final scrollCubit = sl<ScrollPositionCubit>();
-  final ScrollController _scrollController = ScrollController();
-  bool _scrollRestored = false;
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
+  bool _scrolledOnce = false;
+  bool _hasSavedResume = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -37,16 +42,31 @@ class _SurahScreenState extends State<SurahScreen>
         surah = args['surah'] as Surah?;
         final off = args['offset'];
         if (off is num) initialOffset = off.toDouble();
+        final vi = args['verseIndex'];
+        if (vi is int) initialVerseIndex = vi;
       }
 
       if (surah != null) {
         surahBloc.add(LoadSurahEvent(surahId: surah?.id.toString() ?? ""));
         if (mounted) setState(() {});
-        final key = 'surah-${surah!.id}';
-        // Attach listener once we have a key
-        _scrollController.addListener(() {
-          scrollCubit.saveOffset(key, _scrollController.offset);
+        // Track first visible verse index and persist
+        _itemPositionsListener.itemPositions.addListener(() {
+          final positions = _itemPositionsListener.itemPositions.value;
+          if (positions.isEmpty) return;
+          // Index 0 is header; verses start at index 1
+          final min = positions
+              .where((p) => p.index >= 1)
+              .reduce((a, b) => a.index < b.index ? a : b)
+              .index;
+          final verseIndex = (min - 1).clamp(0, 10000);
+          PrefUtils().setSurahVerseIndex(surah!.id, verseIndex);
         });
+        // Check saved resume index to display FAB
+        final savedIndex = initialVerseIndex ??
+            PrefUtils().getSurahVerseIndex(surah!.id);
+        if (savedIndex != null && savedIndex > 0) {
+          setState(() => _hasSavedResume = true);
+        }
       }
     });
     super.initState();
@@ -54,7 +74,7 @@ class _SurahScreenState extends State<SurahScreen>
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    // No explicit controller to dispose
     super.dispose();
   }
 
@@ -62,12 +82,10 @@ class _SurahScreenState extends State<SurahScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return SafeArea(
-      child: WillPopScope(
-        onWillPop: () async {
-          if (surah != null) {
-            scrollCubit.saveOffset('surah-${surah!.id}', _scrollController.offset);
-          }
-          return true;
+      child: PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) async {
+          // Nothing to do; verse index already persisted via listener
         },
         child: Scaffold(
           backgroundColor: Color(
@@ -81,42 +99,64 @@ class _SurahScreenState extends State<SurahScreen>
                 } else if (state is FailureSurahState) {
                   return Center(child: Text(state.errorMessage));
                 } else {
-                  // Restore scroll position once after content is available
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!_scrollRestored && surah != null) {
-                      final saved = initialOffset ??
-                          scrollCubit.getOffset('surah-${surah!.id}');
-                      if (saved != null && _scrollController.hasClients) {
+                  // Scroll to saved verse index once
+                  WidgetsBinding.instance.addPostFrameCallback((_) async {
+                    if (!_scrolledOnce && surah != null) {
+                      final savedIndex = initialVerseIndex ??
+                          PrefUtils().getSurahVerseIndex(surah!.id);
+                      if (savedIndex != null && savedIndex >= 0) {
                         try {
-                          _scrollController.jumpTo(saved);
+                          await _itemScrollController.scrollTo(
+                            index: savedIndex + 1, // +1 to account for header
+                            duration: const Duration(milliseconds: 350),
+                            curve: Curves.easeOutCubic,
+                          );
                         } catch (_) {}
                       }
-                      _scrollRestored = true;
+                      _scrolledOnce = true;
                     }
                   });
-                  return SizedBox(
-                      width: double.maxFinite,
-                      child: SingleChildScrollView(
-                          controller: _scrollController,
-                          key: PageStorageKey(
-                              'surah-scroll-${surah?.id ?? 'unknown'}'),
-                          child: Column(children: [
-                        _buildAppBar(surah),
-                        SizedBox(height: 20.v),
-                        ListView.builder(
-                          key: PageStorageKey(
-                              'surah-list-${surah?.id ?? 'unknown'}'),
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: (state as SuccessSurahState).chapters.length,
-                          itemBuilder: (context, index) {
-                            final aya = (state).chapters[index];
-                            return AyaListItem(
-                              aya: aya,
-                            );
+                  final chapters = (state as SuccessSurahState).chapters;
+                  return Stack(children: [
+                    ScrollablePositionedList.builder(
+                      itemScrollController: _itemScrollController,
+                      itemPositionsListener: _itemPositionsListener,
+                      itemCount: chapters.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return Column(
+                            children: [
+                              _buildAppBar(surah),
+                              SizedBox(height: 20.v),
+                            ],
+                          );
+                        }
+                        final aya = chapters[index - 1];
+                        return AyaListItem(aya: aya);
+                      },
+                    ),
+                    if (_hasSavedResume)
+                      Positioned(
+                        right: 16,
+                        bottom: 16,
+                        child: FloatingActionButton.extended(
+                          onPressed: () async {
+                            final savedIndex = initialVerseIndex ??
+                                PrefUtils().getSurahVerseIndex(surah!.id);
+                            if (savedIndex != null && savedIndex >= 0) {
+                              await _itemScrollController.scrollTo(
+                                index: savedIndex + 1,
+                                duration: const Duration(milliseconds: 350),
+                                curve: Curves.easeOutCubic,
+                              );
+                              if (mounted) setState(() => _hasSavedResume = false);
+                            }
                           },
+                          icon: const Icon(Icons.play_arrow),
+                          label: Text('lbl_continue'.tr),
                         ),
-                      ])));
+                      ),
+                  ]);
                 }
               }))),
       ),

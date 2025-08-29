@@ -20,6 +20,9 @@ final Map<String, String> enUs = {
   "about_source_tanzil": "Tanzil verified Uthmani text — https://tanzil.net/download/",
   "about_feedback_title": "Send Feedback",
   "about_feedback_desc": "Report an issue or suggest an improvement via email.",
+  "about_feedback_hint": "Describe your issue or suggestion...",
+  "about_feedback_send": "Send",
+  "about_feedback_sent": "Thanks for your feedback!",
   "lbl_copied": "Copied"
 
 };

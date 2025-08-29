@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/app_export.dart';
+import 'package:hafiz_app/injection_container.dart';
+import '../../core/analytics/analytics_service.dart';
+import 'package:hafiz_app/main.dart' show globalMessengerKey;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../../core/i18n/locale_controller.dart';
 
@@ -25,7 +29,81 @@ class AboutScreen extends StatelessWidget {
     }
 
     Future<void> openExternal(String url) async {
-      await launchUrlString(url, mode: LaunchMode.externalApplication);
+      try {
+        bool ok = await launchUrlString(url, mode: LaunchMode.externalApplication);
+        if (!ok) {
+          // Fallback to platform default (may open custom tabs/in-app)
+          ok = await launchUrlString(url, mode: LaunchMode.platformDefault);
+        }
+        if (!ok) {
+          globalMessengerKey.currentState?.showSnackBar(
+            SnackBar(content: Text('Could not open: $url')),
+          );
+        }
+        if (ok) {
+          sl<AnalyticsService>().logLinkOpened(url);
+        }
+      } catch (e) {
+        globalMessengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text('Could not open: $url')),
+        );
+      }
+    }
+
+    Future<void> showFeedbackDialog() async {
+      final controller = TextEditingController();
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('about_feedback_title'.tr),
+          content: TextField(
+            controller: controller,
+            maxLines: 6,
+            decoration: InputDecoration(
+              hintText: 'about_feedback_hint'.tr,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                final body = Uri.encodeComponent(controller.text);
+                openExternal(
+                    'mailto:motazhamada@gmail.com?subject=Hafiz%20App%20Feedback&body=$body');
+                Navigator.of(ctx).pop();
+              },
+              child: const Text('Email'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                final msg = controller.text.trim();
+                try {
+                  if (msg.isNotEmpty) {
+                    await FirebaseCrashlytics.instance
+                        .setCustomKey('user_feedback', msg);
+                    await FirebaseCrashlytics.instance.setCustomKey(
+                        'user_feedback_time',
+                        DateTime.now().toIso8601String());
+                    await FirebaseCrashlytics.instance.recordError(
+                      Exception('UserFeedback'),
+                      StackTrace.current,
+                      reason: 'User submitted feedback',
+                      fatal: false,
+                    );
+                    await sl<AnalyticsService>()
+                        .logFeedbackSubmitted(method: 'crashlytics');
+                  }
+                  globalMessengerKey.currentState?.showSnackBar(
+                    SnackBar(content: Text('about_feedback_sent'.tr)),
+                  );
+                } catch (_) {}
+                if (context.mounted) Navigator.of(ctx).pop();
+              },
+              child: Text('about_feedback_send'.tr),
+            ),
+          ],
+        ),
+      );
     }
 
     return Scaffold(
@@ -49,7 +127,10 @@ class AboutScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.person_outline),
                   title: Text('about_ack_idea_by'.tr),
-                  subtitle: Text('https://github.com/abualgait', style: linkStyle),
+                  subtitle: Text(
+                    'https://github.com/abualgait',
+                    style: linkStyle,
+                  ),
                   onTap: () => openExternal('https://github.com/abualgait'),
                   onLongPress: () => copy('https://github.com/abualgait'),
                   trailing: const Icon(Icons.open_in_new),
@@ -57,10 +138,14 @@ class AboutScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.link_outlined),
                   title: Text('about_repo_prefix'.tr),
-                  subtitle: Text('https://github.com/abualgait/HafizApp',
-                      style: linkStyle),
-                  onTap: () => openExternal('https://github.com/abualgait/HafizApp'),
-                  onLongPress: () => copy('https://github.com/abualgait/HafizApp'),
+                  subtitle: Text(
+                    'https://github.com/abualgait/HafizApp',
+                    style: linkStyle,
+                  ),
+                  onTap: () =>
+                      openExternal('https://github.com/abualgait/HafizApp'),
+                  onLongPress: () =>
+                      copy('https://github.com/abualgait/HafizApp'),
                   trailing: const Icon(Icons.open_in_new),
                 ),
                 const Divider(height: 0),
@@ -68,8 +153,7 @@ class AboutScreen extends StatelessWidget {
                   leading: const Icon(Icons.feedback_outlined),
                   title: Text('about_feedback_title'.tr),
                   subtitle: Text('about_feedback_desc'.tr),
-                  onTap: () => openExternal(
-                      'mailto:hafiz.app.feedback@example.com?subject=Hafiz%20App%20Feedback&body=Describe%20your%20issue%20or%20suggestion...'),
+                  onTap: showFeedbackDialog,
                   trailing: const Icon(Icons.open_in_new),
                 ),
               ],

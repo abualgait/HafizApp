@@ -7,6 +7,7 @@ import "../../widgets/custom_app_bar.dart";
 import "../../widgets/custom_elevated_button.dart";
 import "bloc/home_bloc.dart";
 import "../../core/scroll/scroll_position_cubit.dart";
+import "../../core/analytics/analytics_service.dart";
 import "../../core/i18n/locale_controller.dart";
 
 class HomeScreen extends StatefulWidget {
@@ -78,13 +79,14 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                   Switch(
                     value: isDarkMode,
-                    onChanged: (value) {
-                      setState(() {
-                        isDarkMode = value;
-                        PrefUtils().setIsDarkMode(value);
-                        themeBloc.add(ToggleThemeEvent());
-                      });
-                    },
+                  onChanged: (value) {
+                    setState(() {
+                      isDarkMode = value;
+                      PrefUtils().setIsDarkMode(value);
+                      themeBloc.add(ToggleThemeEvent());
+                    });
+                    sl<AnalyticsService>().logThemeChange(value);
+                  },
                     activeTrackColor: Colors.grey[700],
                     activeThumbColor: Colors.grey,
                   ),
@@ -107,6 +109,8 @@ class _HomeScreenState extends State<HomeScreen>
                   changeLocale(context, next);
                   LocaleController.setLocale(next);
                   setState(() {});
+                  sl<AnalyticsService>()
+                      .logLanguageChange(next.languageCode);
                 },
                 tooltip: 'Language',
               ),
@@ -230,14 +234,29 @@ class _HomeScreenState extends State<HomeScreen>
                               CustomElevatedButton(
                                   height: 31,
                                   onPressed: () {
-                                    final offset =
+                                    final cubitOffset =
                                         sl<ScrollPositionCubit>()
                                             .getOffset('surah-${lastReadSurah?.id}');
+                                    final prefOffset = lastReadSurah != null
+                                        ? PrefUtils()
+                                            .getSurahOffset(lastReadSurah.id)
+                                        : null;
+                                    final offset = cubitOffset ?? prefOffset;
+                                    final verseIndex = lastReadSurah != null
+                                        ? PrefUtils()
+                                            .getSurahVerseIndex(lastReadSurah.id)
+                                        : null;
+                                    if (lastReadSurah != null) {
+                                      sl<AnalyticsService>().logContinueReading(
+                                          lastReadSurah.id, offset);
+                                    }
                                     NavigatorService.pushNamed(
                                       AppRoutes.surahPage,
                                       arguments: {
                                         'surah': lastReadSurah,
                                         if (offset != null) 'offset': offset,
+                                        if (verseIndex != null)
+                                          'verseIndex': verseIndex,
                                       },
                                     );
                                   },

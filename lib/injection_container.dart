@@ -11,6 +11,8 @@ import 'package:hafiz_app/data/datasource/surah/surah_local_data_source.dart';
 
 import 'core/network/network_manager.dart';
 import 'core/scroll/scroll_position_cubit.dart';
+import 'core/analytics/analytics_service.dart';
+import 'core/analytics/analytics_route_observer.dart';
 
 final sl = GetIt.instance;
 
@@ -24,6 +26,8 @@ Future<void> init() async {
   sl.registerFactory(() => HomeBloc());
   sl.registerLazySingleton(() => ThemeBloc());
   sl.registerLazySingleton(() => ScrollPositionCubit());
+  sl.registerLazySingleton(() => AnalyticsService());
+  sl.registerLazySingleton(() => AnalyticsRouteObserver(sl()));
 
   // Use Case
   sl.registerLazySingleton(() => GetSurah(surahRepository: sl()));

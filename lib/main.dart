@@ -16,6 +16,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'core/i18n/locale_controller.dart';
+import 'core/analytics/analytics_route_observer.dart';
 
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -88,6 +89,8 @@ class MyApp extends StatelessWidget {
               locale: locale,
               title: 'Hafiz',
               navigatorKey: NavigatorService.navigatorKey,
+              scaffoldMessengerKey: globalMessengerKey,
+              navigatorObservers: [sl<AnalyticsRouteObserver>()],
               debugShowCheckedModeBanner: false,
               localizationsDelegates: const [
                 AppLocalizationDelegate(),
@@ -126,34 +129,48 @@ class _BootstrapAppState extends State<BootstrapApp> {
   }
 
   Future<void> _init() async {
-    await initFirebase();
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
-    await PrefUtils().init();
+    // Fire and forget prefs; default values are handled defensively
+    unawaited(PrefUtils().init());
     await di.init();
 
-    // Initialize Hive and open cache box for repository caching
-    await Hive.initFlutter();
-    await Hive.openBox('surah_cache');
-
-    HydratedBloc.storage = await HydratedStorage.build(
+    // Build Hydrated storage using a fast temp directory with a short soft-timeout
+    final storageFuture = HydratedStorage.build(
       storageDirectory: HydratedStorageDirectory(
-        (await getApplicationDocumentsDirectory()).path,
+        (await getTemporaryDirectory()).path,
       ),
     );
+    final softTimeout = Future.delayed(const Duration(milliseconds: 700));
+    await Future.any([storageFuture, softTimeout]);
+    storageFuture.then((s) => HydratedBloc.storage = s);
 
-    // Wire Crashlytics for Flutter & platform errors
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-    ui.PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-    // Log app open for Analytics
-    unawaited(FirebaseAnalytics.instance.logAppOpen());
+    // Defer heavier services to avoid long splash times
+    unawaited(_postInitHeavyTasks());
 
     if (mounted) {
       setState(() => _ready = true);
+    }
+  }
+
+  Future<void> _postInitHeavyTasks() async {
+    try {
+      await initFirebase();
+      // Initialize Hive cache
+      await Hive.initFlutter();
+      await Hive.openBox('surah_cache');
+      // Crashlytics wiring
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
+      ui.PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+      // Analytics
+      unawaited(FirebaseAnalytics.instance.logAppOpen());
+    } catch (_) {
+      // Best-effort; app should remain usable regardless
     }
   }
 

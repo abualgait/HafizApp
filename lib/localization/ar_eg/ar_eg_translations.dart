@@ -20,5 +20,8 @@ final Map<String, String> arEg = {
   "about_source_tanzil": "نص عثماني مُعتمد من Tanzil — https://tanzil.net/download/",
   "about_feedback_title": "إرسال ملاحظة",
   "about_feedback_desc": "أبلغ عن مشكلة أو اقترح تحسينًا عبر البريد الإلكتروني.",
+  "about_feedback_hint": "اكتب مشكلتك أو اقتراحك...",
+  "about_feedback_send": "إرسال",
+  "about_feedback_sent": "شكرًا لملاحظتك!",
   "lbl_copied": "تم النسخ"
 };
