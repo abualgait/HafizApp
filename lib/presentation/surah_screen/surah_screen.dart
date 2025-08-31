@@ -57,8 +57,9 @@ class _SurahScreenState extends State<SurahScreen>
           final positions = _itemPositionsListener.itemPositions.value;
           if (positions.isEmpty) return;
           // Index 0 is header; verses start at index 1
-          final min = positions
-              .where((p) => p.index >= 1)
+          final versePositions = positions.where((p) => p.index >= 1);
+          if (versePositions.isEmpty) return;
+          final min = versePositions
               .reduce((a, b) => a.index < b.index ? a : b)
               .index;
           final verseIndex = (min - 1).clamp(0, 10000);
