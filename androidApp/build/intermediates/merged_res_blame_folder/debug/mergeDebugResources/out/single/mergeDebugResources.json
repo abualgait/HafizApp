@@ -1,0 +1,42 @@
+[
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.hafiz.kmp.android.androidApp-debug-58:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "com.hafiz.kmp.android.androidApp-main-60:/mipmap-xxxhdpi/ic_launcher_round.png"
+    }
+]
