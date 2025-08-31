@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
@@ -30,38 +30,45 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  flutter_bloc: ^8.0.0
-  connectivity_plus: ^5.0.2
+  flutter_bloc: ^9.1.1
+  connectivity_plus: ^6.1.5
   shared_preferences: ^2.0.15
   cached_network_image: ^3.2.1
   flutter_svg: ^2.0.9
   equatable: ^2.0.0
   dio: ^5.0.3
   dartz: ^0.10.1
-  get_it: ^7.6.4
+  get_it: ^8.2.0
+  hydrated_bloc: ^10.1.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.4
+  url_launcher: ^6.3.0
+  scrollable_positioned_list: ^0.3.8
   #testing
   mocktail: ^1.0.2
-  bloc_test: ^9.1.5
-  firebase_core: ^2.24.2
-  firebase_crashlytics: ^3.4.15
-  firebase_analytics: ^10.8.6
+  bloc_test: ^10.0.0
+  firebase_core: any
+  firebase_crashlytics: any
+  firebase_analytics: any
+  firebase_performance: any
 
 dev_dependencies:
   flutter_test:
-    sdk: flutter
-  flutter_localizations:
     sdk: flutter
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.1
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -92,4 +99,3 @@ flutter:
           weight: 700
         - asset: assets/fonts/AmiriRegular.ttf
           weight: 400
-

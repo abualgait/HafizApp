@@ -4,7 +4,8 @@
         android:label="Hafiz App"
         android:name="${applicationName}"
         android:roundIcon="@mipmap/round_launcher"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name="com.hafiz.app.hafiz_app.MainActivity"
             android:exported="true"
