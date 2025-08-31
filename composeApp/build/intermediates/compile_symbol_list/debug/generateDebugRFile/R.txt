@@ -1,0 +1,5 @@
+int font amiri_bold 0x0
+int font amiri_regular 0x0
+int font poppins_bold 0x0
+int font poppins_regular 0x0
+int font poppins_semibold 0x0
