@@ -18,7 +18,7 @@ void main() {
     group('isConnected', () {
       test('should return true when connectivity is not none', () async {
         when(() => mockConnectivity.checkConnectivity())
-            .thenAnswer((_) async => ConnectivityResult.wifi);
+            .thenAnswer((_) async => [ConnectivityResult.wifi]);
         var result = await networkInfo.isConnected();
 
         expect(result, true);
@@ -27,7 +27,7 @@ void main() {
       test('should return false when connectivity is none', () async {
         // Arrange
         when(() => mockConnectivity.checkConnectivity())
-            .thenAnswer((_) async => ConnectivityResult.none);
+            .thenAnswer((_) async => [ConnectivityResult.none]);
 
         // Act
         final result = await networkInfo.isConnected();
@@ -38,13 +38,12 @@ void main() {
     });
 
     group('ConnectivityResult', () {
-      test('should return wifi when connectivity is ConnectivityResult.wifi',
-          () async {
+      test('should return wifi in results when connectivity is wifi', () async {
         when(() => mockConnectivity.checkConnectivity())
-            .thenAnswer((_) async => ConnectivityResult.wifi);
-        var result = await networkInfo.connectivityResult;
+            .thenAnswer((_) async => [ConnectivityResult.wifi]);
+        var results = await networkInfo.connectivityResult;
 
-        expect(result, ConnectivityResult.wifi);
+        expect(results, [ConnectivityResult.wifi]);
       });
     });
   });

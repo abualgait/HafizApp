@@ -1,7 +1,10 @@
 import "package:flutter/material.dart";
 import "package:hafiz_app/core/quran_index/quran_surah.dart";
 
+import "../../core/analytics/analytics_service.dart";
 import "../../core/app_export.dart";
+import "../../core/i18n/locale_controller.dart";
+import "../../core/scroll/scroll_position_cubit.dart";
 import "../../injection_container.dart";
 import "../../widgets/custom_app_bar.dart";
 import "../../widgets/custom_elevated_button.dart";
@@ -22,23 +25,53 @@ Locale getCurrentLocale() {
   return AppLocalization.of().getCurrentLocale();
 }
 
-class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+class _HomeScreenState extends State<HomeScreen>
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final homeBloc = sl<HomeBloc>();
   final themeBloc = sl<ThemeBloc>();
+  final scrollCubit = sl<ScrollPositionCubit>();
+  final ScrollController _scrollController = ScrollController();
   bool isDarkMode = PrefUtils().getIsDarkMode();
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final saved = scrollCubit.getOffset('home');
+      if (saved != null && _scrollController.hasClients) {
+        try {
+          _scrollController.jumpTo(saved);
+        } catch (_) {}
+      }
+    });
+    _scrollController.addListener(() {
+      scrollCubit.saveOffset('home', _scrollController.offset);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     mediaQueryData = MediaQuery.of(context);
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(
-            PrefUtils().getIsDarkMode() == true ?
-            0xFF000000 :
-            0xFFFFFFFF),
+            PrefUtils().getIsDarkMode() == true ? 0xFF000000 : 0xFFFFFFFF),
         appBar: CustomAppBar(
-            actions: [
-              Row(
+            leadingWidth: 160,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.wb_sunny,
@@ -52,17 +85,41 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         PrefUtils().setIsDarkMode(value);
                         themeBloc.add(ToggleThemeEvent());
                       });
-                      // Add logic to toggle theme here
+                      sl<AnalyticsService>().logThemeChange(value);
                     },
                     activeTrackColor: Colors.grey[700],
-                    activeColor: Colors.grey,
+                    activeThumbColor: Colors.grey,
                   ),
                   Icon(
                     Icons.nightlight_round,
                     color: isDarkMode ? Colors.blue : Colors.grey,
                   ),
                 ],
-              )
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.public),
+                color: isDarkMode ? Colors.white : const Color(0xFF004B40),
+                onPressed: () {
+                  final current = getCurrentLocale();
+                  final next = current.languageCode == 'ar'
+                      ? const Locale('en', 'US')
+                      : const Locale('ar', 'EG');
+                  changeLocale(context, next);
+                  LocaleController.setLocale(next);
+                  setState(() {});
+                  sl<AnalyticsService>().logLanguageChange(next.languageCode);
+                },
+                tooltip: 'Language',
+              ),
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                color: isDarkMode ? Colors.white : const Color(0xFF004B40),
+                onPressed: () {
+                  NavigatorService.pushNamed(AppRoutes.aboutPage);
+                },
+              ),
             ],
             title: Center(
               child: Text(
@@ -84,33 +141,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     body: SizedBox(
                         width: double.maxFinite,
                         child: SingleChildScrollView(
+                            controller: _scrollController,
+                            key: const PageStorageKey('home-scroll'),
                             child: Column(children: [
-                          (state as UpdateLastReadSurah).surah != null
-                              ? _buildCardLastRead((state).surah)
-                              : const SizedBox.shrink(),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: QuranIndex.quranSurahs.length,
-                            itemBuilder: (context, index) {
-                              final surah = QuranIndex.quranSurahs[index];
-                              return InkWell(
-                                onTap: () {
-                                  PrefUtils().saveLastReadSurah(surah);
-                                  homeBloc.add(HomeShowLastSurahEvent());
-                                  NavigatorService.pushNamed(
-                                      AppRoutes.surahPage,
-                                      arguments: surah);
+                              (state as UpdateLastReadSurah).surah != null
+                                  ? _buildCardLastRead((state).surah)
+                                  : const SizedBox.shrink(),
+                              ListView.builder(
+                                key: const PageStorageKey('home-list'),
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: QuranIndex.quranSurahs.length,
+                                itemBuilder: (context, index) {
+                                  final surah = QuranIndex.quranSurahs[index];
+                                  return InkWell(
+                                    onTap: () {
+                                      PrefUtils().saveLastReadSurah(surah);
+                                      homeBloc.add(HomeShowLastSurahEvent());
+                                      NavigatorService.pushNamed(
+                                          AppRoutes.surahPage,
+                                          arguments: surah);
+                                    },
+                                    child: SurahListItem(
+                                      surahId: surah.id,
+                                      nameEnglish: surah.nameEnglish,
+                                      nameArabic: surah.nameArabic,
+                                    ),
+                                  );
                                 },
-                                child: SurahListItem(
-                                  surahId: surah.id,
-                                  nameEnglish: surah.nameEnglish,
-                                  nameArabic: surah.nameArabic,
-                                ),
-                              );
-                            },
-                          ),
-                        ]))),
+                              ),
+                            ]))),
                   ),
                 );
               },
@@ -120,6 +180,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildCardLastRead(Surah? lastReadSurah) {
+    final int? lastVerseIndex = lastReadSurah != null
+        ? PrefUtils().getSurahVerseIndex(lastReadSurah.id)
+        : null;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -146,62 +209,130 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     children: [
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
+                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "lbl_last_read".tr,
-                                style: const TextStyle(
-                                    color: Color(0xFFFAF6EB),
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 12),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10),
+                                child: Text(
+                                  "lbl_last_read".tr,
+                                  style: const TextStyle(
+                                      color: Color(0xFFFAF6EB),
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12),
+                                ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(
                                     top: 8.0, bottom: 8.0),
-                                child: Text(
-                                  lastReadSurah?.nameArabic ?? "",
-                                  style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      fontFamily: "Amiri"),
-                                ),
-                              ),
-                              CustomElevatedButton(
-                                  height: 31,
-                                  onPressed: () {
-                                    NavigatorService.pushNamed(
-                                        AppRoutes.surahPage,
-                                        arguments: lastReadSurah);
-                                  },
-                                  rightIcon: const Padding(
-                                    padding: EdgeInsets.only(left: 8.0),
-                                    child: Icon(
-                                      Icons.arrow_forward,
-                                      color: Color(0xff004B40),
-                                    ),
-                                  ),
-                                  text: "lbl_continue".tr,
-                                  buttonStyle: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            const Color(0xFFFAF6EB)),
-                                    shape: MaterialStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                      RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(200.0),
-                                        // You can also customize other properties like border, elevation, etc.
+                                child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        lastReadSurah?.nameArabic ?? "",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                            fontFamily: "Amiri"),
                                       ),
-                                    ),
-                                  ),
-                                  buttonTextStyle: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14))
+                                      if (lastVerseIndex != null)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFAF6EB),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                            border: Border.all(
+                                                color: const Color(0xFF004B40),
+                                                width: 1),
+                                          ),
+                                          child: Text(
+                                            '${"lbl_ayah".tr} ${lastVerseIndex + 1}',
+                                            style: const TextStyle(
+                                              color: Color(0xFF004B40),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                    ]),
+                              ),
+                              Wrap(
+                                alignment: WrapAlignment.start,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  CustomElevatedButton(
+                                      height: 31,
+                                      onPressed: () {
+                                        final cubitOffset =
+                                            sl<ScrollPositionCubit>().getOffset(
+                                                'surah-${lastReadSurah?.id}');
+                                        final prefOffset = lastReadSurah != null
+                                            ? PrefUtils().getSurahOffset(
+                                                lastReadSurah.id)
+                                            : null;
+                                        final offset =
+                                            cubitOffset ?? prefOffset;
+                                        final verseIndex = lastReadSurah != null
+                                            ? PrefUtils().getSurahVerseIndex(
+                                                lastReadSurah.id)
+                                            : null;
+                                        if (lastReadSurah != null) {
+                                          sl<AnalyticsService>()
+                                              .logContinueReading(
+                                                  lastReadSurah.id, offset);
+                                        }
+                                        NavigatorService.pushNamed(
+                                          AppRoutes.surahPage,
+                                          arguments: {
+                                            'surah': lastReadSurah,
+                                            if (offset != null)
+                                              'offset': offset,
+                                            'resume': true,
+                                            if (verseIndex != null)
+                                              'verseIndex': verseIndex,
+                                          },
+                                        );
+                                      },
+                                      rightIcon: const Padding(
+                                        padding: EdgeInsets.only(left: 8.0),
+                                        child: Icon(
+                                          Icons.arrow_forward,
+                                          color: Color(0xff004B40),
+                                        ),
+                                      ),
+                                      text: "lbl_continue".tr,
+                                      buttonStyle: ButtonStyle(
+                                        backgroundColor:
+                                            WidgetStateProperty.all<Color>(
+                                                const Color(0xFFFAF6EB)),
+                                        shape: WidgetStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(200.0),
+                                            // You can also customize other properties like border, elevation, etc.
+                                          ),
+                                        ),
+                                      ),
+                                      buttonTextStyle: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14)),
+                                ],
+                              )
                             ],
                           ),
                         ),
@@ -243,6 +374,8 @@ class SurahListItem extends StatelessWidget {
       child: Column(
         children: [
           Row(
+            textDirection: TextDirection.ltr,
+            // Force LTR order regardless of app locale
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Card(
@@ -264,18 +397,27 @@ class SurahListItem extends StatelessWidget {
                 child: Text(
                   nameEnglish,
                   style: const TextStyle(fontSize: 18),
+                  textAlign: TextAlign.left,
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                nameArabic,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(PrefUtils().getIsDarkMode() == true
-                        ? 0xFFD9D8D8
-                        : 0xFF076C58),
-                    fontFamily: "Amiri"),
+              Flexible(
+                child: Hero(
+                  tag: 'surah-title-$surahId',
+                  child: Text(
+                    nameArabic,
+                    textDirection: TextDirection.rtl,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Color(PrefUtils().getIsDarkMode() == true
+                            ? 0xFFD9D8D8
+                            : 0xFF076C58),
+                        fontFamily: "Amiri"),
+                  ),
+                ),
               ),
             ],
           ),

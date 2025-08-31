@@ -14,7 +14,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     on<OnboardingInitialEvent>(_onInitialize);
   }
 
-  _onInitialize(
+  Future<void> _onInitialize(
     OnboardingEvent event,
     Emitter<OnboardingState> emit,
   ) async {
