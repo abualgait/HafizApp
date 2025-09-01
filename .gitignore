@@ -1,6 +1,9 @@
 # Miscellaneous
 *.class
 *.log
+*_build_log.txt
+flutter_build_log.txt
+flutter_build_short.txt
 *.pyc
 *.swp
 .DS_Store
@@ -52,5 +55,5 @@ local.properties
 **/*.xcuserdatad/
 
 # Editors
-.idea/
+.idea
 .vscode/
