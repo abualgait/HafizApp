@@ -10,6 +10,8 @@ import 'package:hafiz_app/presentation/surah_screen/bloc/surah_bloc.dart';
 import 'package:hafiz_app/data/datasource/surah/surah_local_data_source.dart';
 
 import 'core/network/network_manager.dart';
+import 'core/network/qf_auth.dart';
+import 'core/config/api_config.dart';
 import 'core/scroll/scroll_position_cubit.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/analytics/analytics_route_observer.dart';
@@ -53,8 +55,20 @@ Future<void> init() async {
    */
   sl.registerLazySingleton(() {
     final dio = Dio();
-    // Switch to Quran.com official API (v4)
-    dio.options.baseUrl = "https://api.quran.com/api/v4";
+    // Select base URL
+    if (ApiConfig.useQfContent) {
+      dio.options.baseUrl = ApiConfig.qfContentBase;
+    } else {
+      dio.options.baseUrl = "https://api.quran.com/api/v4";
+    }
+    dio.options.connectTimeout = const Duration(seconds: 7);
+    dio.options.receiveTimeout = const Duration(seconds: 10);
+
+    // Attach Quran.Foundation OAuth2 interceptor if credentials provided
+    if (ApiConfig.clientId.isNotEmpty && ApiConfig.clientSecret.isNotEmpty) {
+      final auth = QfAuthService();
+      dio.interceptors.add(QfAuthInterceptor(auth));
+    }
     return dio;
   });
 }

@@ -20,11 +20,10 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
     // Quran.com API v4: verses by chapter with Uthmani text
     // Docs: https://api.quran.com/api/v4/
     const int maxAttempts = 3;
-    Response response;
-    DioException? lastError;
+    Response? response;
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        response = await networkManager.get(
+        final r = await networkManager.get(
           '/verses/by_chapter/$surahId',
           params: {
             'per_page': 300,
@@ -32,8 +31,9 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
             'fields': 'chapter_id,verse_key,text_uthmani',
           },
         );
+        response = r;
         // If 5xx/429, backoff and retry (except last attempt)
-        final status = response.statusCode ?? 0;
+        final status = r.statusCode ?? 0;
         if (status == 200) {
           break; // success
         }
@@ -45,7 +45,6 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
         // Non-retryable status; fall through to error throw after loop
         break;
       } on DioException catch (e) {
-        lastError = e;
         // Retry on network-level errors (connect timeout, receive timeout, etc.)
         if (attempt < maxAttempts &&
             (e.type == DioExceptionType.connectionTimeout ||
@@ -58,8 +57,8 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
       }
     }
 
-    if (response.statusCode == 200) {
-      final data = response.data;
+    if (response != null && response.statusCode == 200) {
+      final data = response!.data;
       // Support both legacy shape {"chapter": [...]} and Quran.com {"verses": [...]}
       if (data is Map && data.containsKey('chapter')) {
         return ChapterResponse.fromJson(
@@ -81,9 +80,9 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
       return ChapterResponse(chapters: chapters);
     } else {
       throw DioException(
-        requestOptions: response.requestOptions,
+        requestOptions: response?.requestOptions ?? RequestOptions(path: '/verses/by_chapter/$surahId'),
         response: response,
-        error: 'Unexpected status code: ${response.statusCode}',
+        error: 'Unexpected status code: ${response?.statusCode}',
         type: DioExceptionType.badResponse,
       );
     }
