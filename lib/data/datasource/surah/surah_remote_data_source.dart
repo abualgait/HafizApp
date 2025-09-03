@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:hafiz_app/core/network/network_manager.dart';
 
@@ -18,14 +19,44 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
   Future<ChapterResponse> getSurah(String surahId) async {
     // Quran.com API v4: verses by chapter with Uthmani text
     // Docs: https://api.quran.com/api/v4/
-    var response = await networkManager.get(
-      '/verses/by_chapter/$surahId',
-      params: {
-        'per_page': 300,
-        'words': 'false',
-        'fields': 'chapter_id,verse_key,text_uthmani',
-      },
-    );
+    const int maxAttempts = 3;
+    Response response;
+    DioException? lastError;
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        response = await networkManager.get(
+          '/verses/by_chapter/$surahId',
+          params: {
+            'per_page': 300,
+            'words': 'false',
+            'fields': 'chapter_id,verse_key,text_uthmani',
+          },
+        );
+        // If 5xx/429, backoff and retry (except last attempt)
+        final status = response.statusCode ?? 0;
+        if (status == 200) {
+          break; // success
+        }
+        if ((status >= 500 || status == 429) && attempt < maxAttempts) {
+          // simple exponential-ish backoff
+          await Future.delayed(Duration(milliseconds: 200 * attempt * attempt));
+          continue;
+        }
+        // Non-retryable status; fall through to error throw after loop
+        break;
+      } on DioException catch (e) {
+        lastError = e;
+        // Retry on network-level errors (connect timeout, receive timeout, etc.)
+        if (attempt < maxAttempts &&
+            (e.type == DioExceptionType.connectionTimeout ||
+                e.type == DioExceptionType.receiveTimeout ||
+                e.type == DioExceptionType.connectionError)) {
+          await Future.delayed(Duration(milliseconds: 200 * attempt * attempt));
+          continue;
+        }
+        rethrow; // non-retryable Dio errors
+      }
+    }
 
     if (response.statusCode == 200) {
       final data = response.data;
