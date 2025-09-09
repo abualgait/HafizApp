@@ -25,9 +25,9 @@ class NetworkManagerImpl extends NetworkManagerI {
         options: Options(validateStatus: (_) => true),
       );
       return response;
-    } on DioException catch (e) {
+    } on DioException {
       // Preserve DioException so upstream can handle gracefully.
-      throw e;
+      rethrow;
     }
   }
 
@@ -40,8 +40,8 @@ class NetworkManagerImpl extends NetworkManagerI {
         options: Options(validateStatus: (_) => true),
       );
       return response;
-    } on DioException catch (e) {
-      throw e;
+    } on DioException {
+      rethrow;
     }
   }
 
@@ -54,8 +54,8 @@ class NetworkManagerImpl extends NetworkManagerI {
         options: Options(validateStatus: (_) => true),
       );
       return response;
-    } on DioException catch (e) {
-      throw e;
+    } on DioException {
+      rethrow;
     }
   }
 
@@ -68,8 +68,8 @@ class NetworkManagerImpl extends NetworkManagerI {
         options: Options(validateStatus: (_) => true),
       );
       return response;
-    } on DioException catch (e) {
-      throw e;
+    } on DioException {
+      rethrow;
     }
   }
 }
