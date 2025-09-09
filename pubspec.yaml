@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.1.0+3
 
 environment:
-  sdk: '>=3.2.3 <4.0.0'
+  sdk: '>=3.9.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -55,10 +55,10 @@ dependencies:
   #testing
   mocktail: ^1.0.2
   bloc_test: ^10.0.0
-  firebase_core: any
-  firebase_crashlytics: any
-  firebase_analytics: any
-  firebase_performance: any
+  firebase_core: ^4.1.0
+  firebase_crashlytics: ^5.0.1
+  firebase_analytics: ^12.0.1
+  firebase_performance: ^0.11.0+1
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +69,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+## dependency_overrides removed as part of Flutter upgrade prep
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

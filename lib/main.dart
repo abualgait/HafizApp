@@ -132,6 +132,14 @@ class _BootstrapAppState extends State<BootstrapApp> {
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
+    // Enable edge-to-edge so Flutter draws behind system bars.
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // Use transparent system bars; icon brightness will adapt with theme.
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ));
     // Fire and forget prefs; default values are handled defensively
     unawaited(PrefUtils().init());
     await di.init();

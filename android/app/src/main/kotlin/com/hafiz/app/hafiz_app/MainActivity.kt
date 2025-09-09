@@ -8,11 +8,7 @@ import io.flutter.embedding.android.FlutterActivity
 class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Opt-in to edge-to-edge in a backwards compatible way
+        // Opt-in to edge-to-edge; icon appearance is managed by Flutter/Dart
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        // Let system pick light/dark nav/status icon color based on content later
-        val controller = WindowInsetsControllerCompat(window, window.decorView)
-        controller.isAppearanceLightStatusBars = false
-        controller.isAppearanceLightNavigationBars = false
     }
 }

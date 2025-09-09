@@ -30,6 +30,12 @@ def keystorePropertiesFile = rootProject.file('keystore.properties')
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
+// Resolve release signing only if fully configured and file exists
+def resolvedStoreFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+def isReleaseSigningConfigured = resolvedStoreFile != null && resolvedStoreFile.exists() &&
+        keystoreProperties['storePassword'] &&
+        keystoreProperties['keyAlias'] &&
+        keystoreProperties['keyPassword']
 
 android {
     namespace "com.hafiz.app.hafiz_app"
@@ -50,7 +56,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.hafiz.app.hafiz_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
@@ -61,16 +66,23 @@ android {
         versionName flutterVersionName
     }
     signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword keystoreProperties['storePassword']
+        if (isReleaseSigningConfigured) {
+            release {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile resolvedStoreFile
+                storePassword keystoreProperties['storePassword']
+            }
         }
     }
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            if (isReleaseSigningConfigured) {
+                signingConfig signingConfigs.release
+            } else {
+                println("[Gradle] Warning: Release keystore not configured or keystore file missing. Using debug signing for release build.")
+                signingConfig signingConfigs.debug
+            }
         }
     }
 }
@@ -87,4 +99,5 @@ kotlin {
 
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.google.android.material:material:1.12.0'
 }
