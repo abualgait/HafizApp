@@ -58,18 +58,18 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
     }
 
     if (response != null && response.statusCode == 200) {
-      final data = response!.data;
+      final data = response.data;
       // Support both legacy shape {"chapter": [...]} and Quran.com {"verses": [...]}
       if (data is Map && data.containsKey('chapter')) {
-        return ChapterResponse.fromJson(
-            Map<String, dynamic>.from(data));
+        return ChapterResponse.fromJson(Map<String, dynamic>.from(data));
       }
 
       final verses = (data['verses'] as List<dynamic>?) ?? const [];
       final chapters = verses.map((v) {
         final m = v as Map<String, dynamic>;
         final verseNumber = m['verse_number'] as int? ??
-            int.tryParse(((m['verse_key'] as String?) ?? '0:0').split(':').last) ??
+            int.tryParse(
+                ((m['verse_key'] as String?) ?? '0:0').split(':').last) ??
             0;
         return Chapter(
           chapter: (m['chapter_id'] as num?)?.toInt() ?? int.parse(surahId),
@@ -80,7 +80,8 @@ class SurahRemoteDataSourceImpl implements SurahRemoteDataSource {
       return ChapterResponse(chapters: chapters);
     } else {
       throw DioException(
-        requestOptions: response?.requestOptions ?? RequestOptions(path: '/verses/by_chapter/$surahId'),
+        requestOptions: response?.requestOptions ??
+            RequestOptions(path: '/verses/by_chapter/$surahId'),
         response: response,
         error: 'Unexpected status code: ${response?.statusCode}',
         type: DioExceptionType.badResponse,
