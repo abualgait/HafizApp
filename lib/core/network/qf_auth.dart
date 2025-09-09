@@ -18,7 +18,8 @@ class QfAuthService {
     if (_accessToken == null) return false;
     final now = DateTime.now().toUtc();
     // Refresh a bit before expiry to avoid race
-    return _expiresAt != null && now.isBefore(_expiresAt!.subtract(const Duration(seconds: 30)));
+    return _expiresAt != null &&
+        now.isBefore(_expiresAt!.subtract(const Duration(seconds: 30)));
   }
 
   String? get accessToken => _accessToken;
@@ -38,7 +39,8 @@ class QfAuthService {
     _refreshCompleter = Completer<void>();
     try {
       final tokenUrl = '${ApiConfig.oauthBase}/token';
-      final authHeader = 'Basic ' + base64Encode(utf8.encode('${ApiConfig.clientId}:${ApiConfig.clientSecret}'));
+      final authHeader =
+          'Basic ${base64Encode(utf8.encode('${ApiConfig.clientId}:${ApiConfig.clientSecret}'))}';
       final form = {
         'grant_type': 'client_credentials',
         if (ApiConfig.scope.isNotEmpty) 'scope': ApiConfig.scope,
@@ -55,7 +57,9 @@ class QfAuthService {
         ),
       );
       if (resp.statusCode == 200) {
-        final data = resp.data is Map ? Map<String, dynamic>.from(resp.data) : json.decode(resp.data as String);
+        final data = resp.data is Map
+            ? Map<String, dynamic>.from(resp.data)
+            : json.decode(resp.data as String);
         _accessToken = data['access_token'] as String?;
         final int expiresIn = (data['expires_in'] as num?)?.toInt() ?? 3600;
         _expiresAt = DateTime.now().toUtc().add(Duration(seconds: expiresIn));
@@ -85,7 +89,8 @@ class QfAuthInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
     if (_isQfHost(options)) {
       try {
         await auth.ensureToken();
@@ -115,7 +120,8 @@ class QfAuthInterceptor extends Interceptor {
     super.onError(err, handler);
   }
 
-  Future<Response<dynamic>> _retryWithToken(RequestOptions requestOptions, String token) async {
+  Future<Response<dynamic>> _retryWithToken(
+      RequestOptions requestOptions, String token) async {
     final dio = Dio();
     // Copy base options
     dio.options = BaseOptions(
@@ -140,4 +146,3 @@ class QfAuthInterceptor extends Interceptor {
     );
   }
 }
-
