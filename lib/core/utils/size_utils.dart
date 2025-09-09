@@ -1,13 +1,21 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
-// This functions are responsible to make UI responsive across all the mobile devices.
+// Backing field to allow optional override from widgets with context.
+MediaQueryData? _mediaQueryDataOverride;
 
 // Resolve MediaQueryData without using deprecated `ui.window`.
 MediaQueryData get mediaQueryData {
+  final override = _mediaQueryDataOverride;
+  if (override != null) return override;
   final ui.FlutterView view =
       WidgetsBinding.instance.platformDispatcher.views.first;
   return MediaQueryData.fromView(view);
+}
+
+// Allow assignment like `mediaQueryData = MediaQuery.of(context)`.
+set mediaQueryData(MediaQueryData data) {
+  _mediaQueryDataOverride = data;
 }
 
 // These are the Viewport values of your Figma Design.
