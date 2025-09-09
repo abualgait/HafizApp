@@ -1,9 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
-// This functions are responsible to make UI responsive across all the mobile devices.
-
-
 // Backing field to allow optional override from widgets with context.
 MediaQueryData? _mediaQueryDataOverride;
 
