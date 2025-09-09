@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:hafiz_app/core/quran_index/quran_surah.dart";
 
 import "../../core/analytics/analytics_service.dart";
+import "../../core/analytics/analytics_route_observer.dart";
 import "../../core/app_export.dart";
 import "../../core/i18n/locale_controller.dart";
 import "../../core/scroll/scroll_position_cubit.dart";
@@ -26,7 +27,7 @@ Locale getCurrentLocale() {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin, RouteAware {
   final homeBloc = sl<HomeBloc>();
   final themeBloc = sl<ThemeBloc>();
   final scrollCubit = sl<ScrollPositionCubit>();
@@ -53,7 +54,31 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      try {
+        sl<AnalyticsRouteObserver>().subscribe(this, route);
+      } catch (_) {}
+    }
+  }
+
+  @override
+  void didPopNext() {
+    // Called when coming back from another route (e.g., SurahScreen)
+    // Refresh last read card to show updated ayah number.
+    try {
+      homeBloc.add(HomeShowLastSurahEvent());
+    } catch (_) {}
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    try {
+      sl<AnalyticsRouteObserver>().unsubscribe(this);
+    } catch (_) {}
     _scrollController.dispose();
     super.dispose();
   }

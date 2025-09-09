@@ -51,7 +51,8 @@ class AnalyticsService {
     final a = _analytics;
     if (a == null) return;
     await a.logEvent(name: 'theme_toggle', parameters: {
-      'is_dark': isDark,
+      // Firebase Analytics only supports String or num parameter values
+      'is_dark': isDark ? 1 : 0,
     });
   }
 

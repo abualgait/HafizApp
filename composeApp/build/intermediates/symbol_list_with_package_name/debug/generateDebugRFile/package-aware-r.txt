@@ -1,6 +1,0 @@
-com.hafiz.kmp.composeapp
-font amiri_bold
-font amiri_regular
-font poppins_bold
-font poppins_regular
-font poppins_semibold
