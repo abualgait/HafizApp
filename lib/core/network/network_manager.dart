@@ -18,40 +18,58 @@ class NetworkManagerImpl extends NetworkManagerI {
   @override
   Future<Response> get(String url, {Map<String, dynamic>? params}) async {
     try {
-      final response = await _dio.get(url, queryParameters: params);
+      // Accept non-2xx and let callers decide. Avoid Dio throwing on 4xx/5xx.
+      final response = await _dio.get(
+        url,
+        queryParameters: params,
+        options: Options(validateStatus: (_) => true),
+      );
       return response;
-    } catch (error) {
-      throw Exception('Error making GET request: $error');
+    } on DioException {
+      // Preserve DioException so upstream can handle gracefully.
+      rethrow;
     }
   }
 
   @override
   Future<Response> post(String url, {Map<String, dynamic>? data}) async {
     try {
-      final response = await _dio.post(url, data: data);
+      final response = await _dio.post(
+        url,
+        data: data,
+        options: Options(validateStatus: (_) => true),
+      );
       return response;
-    } catch (error) {
-      throw Exception('Error making POST request: $error');
+    } on DioException {
+      rethrow;
     }
   }
 
   @override
   Future<Response> put(String url, {Map<String, dynamic>? data}) async {
     try {
-      final response = await _dio.put(url, data: data);
+      final response = await _dio.put(
+        url,
+        data: data,
+        options: Options(validateStatus: (_) => true),
+      );
       return response;
-    } catch (error) {
-      throw Exception('Error making PUT request: $error');
+    } on DioException {
+      rethrow;
     }
   }
 
   @override
   Future<Response> delete(String url, {Map<String, dynamic>? data}) async {
     try {
-      final response = await _dio.delete(url, data: data);
+      final response = await _dio.delete(
+        url,
+        data: data,
+        options: Options(validateStatus: (_) => true),
+      );
       return response;
-    } catch (error) {
-      throw Exception('Error making DELETE request: $error');
+    } on DioException {
+      rethrow;
     }
   }
 }
